@@ -3,9 +3,12 @@
 
 int main()
 {
-    std::cout << (Angle::Lerp(10.0f, 20.0f, 0.5f)).AsDegrees() << std::endl;
+    Vec2 vec = {1.0f, 2.0f};
 
+    std::cout << vec.Distance(Vec2(1.0f, 2.0f)) << std::endl;
 
+    std::cout << Vec2(1.0f, 1.0f).Length() << std::endl;
+    std::cout << Vec2(1.0f, 1.0f).Normalized().Length() << std::endl;
 
     return 0;
 }
