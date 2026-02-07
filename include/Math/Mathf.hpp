@@ -62,6 +62,8 @@ namespace Mathematics
 
         inline float pow(float value, float exponent) { return MathInternal::pow(value, exponent); }
 
+        inline bool nearlyEqual(float a, float b) { return MathInternal::nearlyEqual(a, b); }
+
 
         // Min and Max methods, taking two or an infinite number of arguments 
 

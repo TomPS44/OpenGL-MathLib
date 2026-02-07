@@ -74,12 +74,27 @@ namespace Mathematics
 
         inline float mod(float value, float modulus)
         {
-            return std::fmodf(value, modulus);
+            return std::fmod(value, modulus);
         }
 
         inline float pow(float value, float exponent)
         {
             return std::powf(value, exponent);
+        }
+
+        inline float toRadians(float degAngle)
+        {
+            return degAngle * Constants::DegToRad;
+        }
+
+        inline float toDegrees(float radAngle)
+        {
+            return radAngle * Constants::RadToDeg;
+        }
+
+        inline bool nearlyEqual(float lhs, float rhs)
+        {
+            return std::abs(rhs - lhs) < Constants::Epsilon;;
         }
     }
 }

@@ -1,5 +1,6 @@
 #pragma once 
 
+#include <cmath>
 #include "Math\MathInternal.hpp"
 
 namespace Mathematics
@@ -12,6 +13,8 @@ namespace Mathematics
         float m_X, m_Y, m_Z;
 
     public:
+        // Constructor that returns a vec3 with x being 0.0, y being 0.0, z being 0.0
+        vec3() : m_X(0.0f), m_Y(0.0f), m_Z(0.0f) {}
         // Constructor that returns a vec3 with x being vx, y being vy and z being vz 
         vec3(float vx, float vy) : m_X(vx), m_Y(vy), m_Z(0.0f) {}
         // Constructor that returns a vec3 with x being vx, y being vy and z being 0.0 
@@ -59,18 +62,18 @@ namespace Mathematics
 
         // Returns a float pointer of the vector's value at the specified index (x -> 0, y -> 1, z -> 2)
         // The specified index is clamped between 0 and 2
-        float* operator[](int index)
+        float* operator[](int index) const
         {
             index = MathInternal::clamp(index, 0.0f, 2.0f);
 
-            if (index == 0) { return &m_X; }
-            else if (index == 1) { return &m_Y; }
-            else { return &m_Z; }
+            if (index == 0) { return const_cast<float*>(&m_X); }
+            else if (index == 1) { return const_cast<float*>(&m_Y); }
+            else { return const_cast<float*>(&m_Z); }
         }
 
         float length() const
         {
-            return MathInternal::sqrt( (m_X * m_X) + (m_Y * m_Y) + (m_Z * m_Z) );
+            return std::sqrtf( (m_X * m_X) + (m_Y * m_Y) + (m_Z * m_Z) );
         }
         float lengthSquared() const 
         {
@@ -81,10 +84,21 @@ namespace Mathematics
         {
             return (m_X * other.m_X) + (m_Y * other.m_Y) + (m_Z * other.m_Y);
         }
+        vec3 crossProduct(const vec3& other) const 
+        {
+            // Le pruduit vectoriel de u par v est 
+            // u x v = [ uY x vZ - uZ x vY, -(uX x vZ - uZ x vX), uX x vY - uY x vX ]
+
+            float x = m_Y * other.m_Z - m_Z * other.m_Y;
+            float y = -(m_X * other.m_Z - m_Z * other.m_X);
+            float z = m_X * other.m_Y - m_Y * other.m_X;
+
+            return vec3(x, y, z);
+        }
 
         float distance(const vec3& other) const
         {
-            return MathInternal::sqrt( (other.m_X - m_X) * (other.m_X - m_X) + (other.m_Y - m_Y) * (other.m_Y - m_Y) +(other.m_Z - m_Z) * (other.m_Z - m_Z) );
+            return std::sqrtf( (other.m_X - m_X) * (other.m_X - m_X) + (other.m_Y - m_Y) * (other.m_Y - m_Y) +(other.m_Z - m_Z) * (other.m_Z - m_Z) );
         }
         float distanceSquared(const vec3& other) const
         {
@@ -94,7 +108,7 @@ namespace Mathematics
 
         static float length(const vec3& vec) 
         {
-            return MathInternal::sqrt( (vec.m_X * vec.m_X) + (vec.m_Y * vec.m_Y) + (vec.m_Z * vec.m_Z) );
+            return std::sqrtf( (vec.m_X * vec.m_X) + (vec.m_Y * vec.m_Y) + (vec.m_Z * vec.m_Z) );
         }
         static float lengthSquared(const vec3 vec)  
         {
@@ -106,11 +120,23 @@ namespace Mathematics
             return (vec1.m_X * vec2.m_X) + (vec1.m_Y * vec2.m_Y) + (vec1.m_Z * vec2.m_Y);
         }
 
+        static vec3 crossProduct(const vec3& a, const vec3& b)
+        {
+            // Le pruduit vectoriel de u par v est 
+            // u x v = [ uY x vZ - uZ x vY, -(uX x vZ - uZ x vX), uX x vY - uY x vX ]
+
+            float x = a.y() * b.z() - a.z() * b.y();
+            float y = -(a.x() * b.z() - a.z() * b.x());
+            float z = a.x() * b.y() - a.y() * b.x();
+
+            return vec3(x, y, z);
+        }
+
         static float distance(const vec3& vec1, const vec3& vec2) 
         {
-            return MathInternal::sqrt( (vec2.m_X - vec1.m_X) * (vec2.m_X - vec1.m_X) + 
-                                       (vec2.m_Y - vec1.m_Y) * (vec2.m_Y - vec1.m_Y) +
-                                       (vec2.m_Z - vec1.m_Z) * (vec2.m_Z - vec1.m_Z) );
+            return std::sqrtf( (vec2.m_X - vec1.m_X) * (vec2.m_X - vec1.m_X) + 
+                               (vec2.m_Y - vec1.m_Y) * (vec2.m_Y - vec1.m_Y) +
+                               (vec2.m_Z - vec1.m_Z) * (vec2.m_Z - vec1.m_Z) );
         }
         static float distanceSquared(const vec3& vec1, const vec3& vec2) 
         {
@@ -134,7 +160,7 @@ namespace Mathematics
                 return target;
             }
 
-            float distance = MathInternal::sqrt(distanceSqr);
+            float distance = std::sqrtf(distanceSqr);
 
             return vec3(current.m_X + x / distance * maxDistance,
                         current.m_Y + y / distance * maxDistance,
@@ -162,9 +188,7 @@ namespace Mathematics
         {
             vec3 copy = *this;
 
-            copy.normalized();
-
-            return copy;
+            return copy.normalized();
         }
 
         static vec3 lerp(const vec3& start, const vec3& end, float t)
@@ -241,9 +265,9 @@ namespace Mathematics
 
     inline bool operator==(const vec3& a, const vec3& b)
     {
-        return MathInternal::abs(a.x() - b.x()) < Constants::Epsilon && 
-               MathInternal::abs(a.y() - b.y()) < Constants::Epsilon &&
-               MathInternal::abs(a.z() - b.z()) < Constants::Epsilon;
+        return std::abs(a.x() - b.x()) < Constants::Epsilon && 
+               std::abs(a.y() - b.y()) < Constants::Epsilon &&
+               std::abs(a.z() - b.z()) < Constants::Epsilon;
     }
 
     inline bool operator!=(const vec3& a, const vec3& b)

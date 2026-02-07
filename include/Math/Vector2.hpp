@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 #include "Math\MathInternal.hpp"
 
 namespace Mathematics
@@ -12,6 +14,8 @@ namespace Mathematics
         float m_X, m_Y;
 
     public:
+        // Constructor that returns a vec2 with x being 0.0, and y being 0.0 
+        vec2() : m_X(0.0f), m_Y(0.0f) {}
         // Constructor that returns a vec2 with x being vx, and y being vy 
         vec2(float vx, float vy) : m_X(vx), m_Y(vy) {}
         // Constructor that returns a vec2 with x being vec.x and y being vec.y
@@ -47,7 +51,7 @@ namespace Mathematics
         vec2 yy() const { return vec2(m_Y, m_Y); }
 
         // Returns the same vector, but with its magnitude being 1
-        vec2& normalize()
+        vec2& normalized()
         {
             float l = this->length();
             if (l > 0.0f) 
@@ -65,15 +69,14 @@ namespace Mathematics
         vec2 getUnitVector() const
         {
             vec2 copy = *this;
-            copy.normalize();
 
-            return copy;
+            return copy.normalized();
         }
 
         // Returns the magnitude of the vector
         float length() const
         {
-            return MathInternal::sqrt( (m_X * m_X) + (m_Y * m_Y) );
+            return std::sqrtf( (m_X * m_X) + (m_Y * m_Y) );
         }
         // Returns the magnitude of the vector, but squared
         float lengthSquared() const
@@ -88,7 +91,7 @@ namespace Mathematics
         // Returns the distance between the vector, and the one specified as a parameter
         float distance(const vec2& other) const
         {
-            return MathInternal::sqrt( (other.m_X - m_X) * (other.m_X - m_X)  +  (other.m_Y - m_Y) * (other.m_Y - m_Y) );
+            return std::sqrtf( (other.m_X - m_X) * (other.m_X - m_X)  +  (other.m_Y - m_Y) * (other.m_Y - m_Y) );
         }
         // Returns the distance between the vector, and the one specified as a parameter, but squared
         float distanceSquared(const vec2& other) const
@@ -99,7 +102,7 @@ namespace Mathematics
 
         static float length(const vec2& vec) 
         {
-            return MathInternal::sqrt( (vec.m_X * vec.m_X) + (vec.m_Y * vec.m_Y) );
+            return std::sqrtf( (vec.m_X * vec.m_X) + (vec.m_Y * vec.m_Y) );
         }
         static float lengthSquared(const vec2& vec) 
         {
@@ -113,7 +116,7 @@ namespace Mathematics
 
         static float distance(const vec2& vec1, const vec2& vec2)
         {
-            return MathInternal::sqrt( (vec1.m_X - vec2.m_X) * (vec1.m_X - vec2.m_X)  +  (vec1.m_Y - vec2.m_Y) * (vec1.m_Y - vec2.m_Y) );
+            return std::sqrtf( (vec1.m_X - vec2.m_X) * (vec1.m_X - vec2.m_X)  +  (vec1.m_Y - vec2.m_Y) * (vec1.m_Y - vec2.m_Y) );
         }
         static float distanceSquared(const vec2& vec1, const vec2& vec2)
         {
@@ -169,7 +172,7 @@ namespace Mathematics
         // The specified index is clamped between 0 and 1
         float* operator[](int index)
         {
-            index = Mathf::clamp01(index);
+            index = MathInternal::clamp01(index);
 
             if (index == 0) { return &m_X; }
             else { return &m_Y; }
@@ -204,7 +207,7 @@ namespace Mathematics
 
     inline bool operator==(const vec2& a, const vec2& b)
     {
-        return MathInternal::abs(a.x() - b.x()) < Constants::Epsilon && MathInternal::abs(a.y() - b.y()) < Constants::Epsilon;
+        return std::abs(a.x() - b.x()) < Constants::Epsilon && std::abs(a.y() - b.y()) < Constants::Epsilon;
     }
     inline bool operator!=(const vec2& a, const vec2& b)
     {
