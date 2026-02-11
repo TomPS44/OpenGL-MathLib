@@ -1,17 +1,22 @@
 #include <iostream>
+#include <concepts>
+
 #include "Math.hpp"
 
-void logVec2(const vec2& vec)
+template<std::floating_point F>
+void logVec2(const vec2<F>& vec)
 {
-    std::cout << "(" << vec.x() << ", " << vec.y() << ")" << std::endl;
+    std::cout << "(" << vec.x << ", " << vec.y << ")" << std::endl;
 }
-void logVec3(const vec3& vec)
+template<std::floating_point F>
+void logVec3(const vec3<F>& vec)
 {
-    std::cout << "(" << vec.x() << ", " << vec.y() << ", " << vec.z() << ")" << std::endl;
+    std::cout << "(" << vec.x << ", " << vec.y << ", " << vec.z << ")" << std::endl;
 }
-void logQuat(const quat& quat)
+template<std::floating_point F>
+void logQuat(const quat<F>& quat)
 {
-    std::cout << "(" << quat.w() << ", " << quat.x() << ", " << quat.y() << ", " << quat.z() << ")" << std::endl;
+    std::cout << "(" << quat.w << ", " << quat.x << ", " << quat.y << ", " << quat.z << ")" << std::endl;
 }
 void logMat4(const mat4& mat)
 {
@@ -19,7 +24,7 @@ void logMat4(const mat4& mat)
     {
         for (int j = 0; j < 4; j++)
         {
-            std::cout << mat.at(i, j) << " ";
+            std::cout << mat.columns[j][i] << " ";
         }
         std::cout << '\n';
     }
@@ -28,17 +33,11 @@ void logMat4(const mat4& mat)
 
 int main() 
 {
-    mat4 T = mat4::identity();
-    T.at(0, 3) = 10.0f;
+    // It's just a way of writing vec3(1.0, 1.0, 1.0) 
+    logVec3(vec3d::lerp(vec3f::zero<float>().XYZ<double>(), vec3d::one<double>() * 2.0, 0.5));
 
-    mat4 S = mat4::identity();
-    S.at(0, 0) = 2.0f; S.at(1, 1) = 2.0f; S.at(2, 2) = 2.0f;
+    logMat4(quatd::identity().toMat4());
 
-    mat4 combined = T * S;
-
-    std::cout << Mathf::nearlyEqual(combined.at(0, 3), T.at(0, 3)) << std::endl;
-    logMat4(combined);
-    
     return 0;
 }
 

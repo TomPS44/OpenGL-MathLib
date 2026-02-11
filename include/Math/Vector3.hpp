@@ -1,123 +1,190 @@
 #pragma once 
 
 #include <cmath>
-#include "Math\MathInternal.hpp"
+#include <concepts>
 
-namespace Mathematics
+#include "Math\MathInternal.hpp"
+#include "Math\Concepts.hpp"
+
+namespace math
 {
+    template<std::floating_point F>
     struct vec2;
 
+    // A struct used to represent a Vector3, with x, y and z components
+    template<std::floating_point F>
     struct vec3
     {
-    private:
-        float m_X, m_Y, m_Z;
+    public:
+        union 
+        {
+            struct { F x, y, z; };
+            struct { F r, g, b; };
+            F data[3];
+        };
 
     public:
         // Constructor that returns a vec3 with x being 0.0, y being 0.0, z being 0.0
-        vec3() : m_X(0.0f), m_Y(0.0f), m_Z(0.0f) {}
+        vec3() : x(static_cast<F>(0.0)), y(static_cast<F>(0.0)), z(static_cast<F>(0.0)) {}
         // Constructor that returns a vec3 with x being vx, y being vy and z being vz 
-        vec3(float vx, float vy) : m_X(vx), m_Y(vy), m_Z(0.0f) {}
+        vec3(F vx, F vy) : x(vx), y(vy), z(static_cast<F>(0.0)) {}
         // Constructor that returns a vec3 with x being vx, y being vy and z being 0.0 
-        vec3(float vx, float vy, float vz) : m_X(vx), m_Y(vy), m_Z(vz) {}
+        vec3(F vx, F vy, F vz) : x(vx), y(vy), z(vz) {}
         // Constructor that returns a vec3 with x being vec.x, y being vec.y and z being vec.z
-        vec3(const vec3& vec) : m_X(vec.m_X), m_Y(vec.m_Y), m_Z(vec.m_Z) {}
+        vec3(const vec3& vec) : x(static_cast<F>(vec.x)), y(static_cast<F>(vec.y)), z(static_cast<F>(vec.z)) {}
 
         // Constructor that returns a vec3 with x being vec.x, y being vec.y and z being 0.0
-        vec3(const vec2& xy);
+        vec3(const vec2<F>& xy);
         // Constructor that returns a vec3 with x being vec.x, y being vec.y and z being vz
-        vec3(const vec2& xy, float vz);
+        vec3(const vec2<F>& xy, F vz);
 
-        operator vec2() const;
+        template<std::floating_point f>
+        static vec3<f> zero() { return vec3(static_cast<f>(0.0), static_cast<f>(0.0), static_cast<f>(0.0)); }
+        template<std::floating_point f>
+        static vec3<f> one() { return vec3(static_cast<f>(1.0), static_cast<f>(1.0), static_cast<f>(1.0)); }
+        template<std::floating_point f>
+        static vec3<f> right() { return vec3(static_cast<f>(1.0), static_cast<f>(0.0), static_cast<f>(0.0)); }
+        template<std::floating_point f>
+        static vec3<f> left() { return vec3(static_cast<f>(-1.0), static_cast<f>(0.0), static_cast<f>(0.0)); }
+        template<std::floating_point f>
+        static vec3<f> up() { return vec3(static_cast<f>(0.0), static_cast<f>(1.0), static_cast<f>(0.0)); }
+        template<std::floating_point f>
+        static vec3<f> down() { return vec3(static_cast<f>(0.0), static_cast<f>(1.0), static_cast<f>(0.0)); }
+        template<std::floating_point f>
+        static vec3<f> forward() { return vec3(static_cast<f>(0.0), static_cast<f>(0.0), static_cast<f>(1.0)); }
+        template<std::floating_point f>
+        static vec3<f> backward() { return vec3(static_cast<f>(0.0), static_cast<f>(0.0), static_cast<f>(-1.0)); }
 
-        static vec3 zero() { return vec3(0.0f, 0.0f, 0.0f); }
-        static vec3 one() { return vec3(1.0f, 1.0f, 1.0f); }
-        static vec3 right() { return vec3(1.0f, 0.0f, 0.0f); }
-        static vec3 left() { return vec3(-1.0f, 0.0f, 0.0f); }
-        static vec3 up() { return vec3(0.0f, 1.0f, 0.0f); }
-        static vec3 down() { return vec3(0.0f, 1.0f, 0.0f); }
-        static vec3 forward() { return vec3(0.0f, 0.0f, 1.0f); }
-        static vec3 backward() { return vec3(0.0f, 0.0f, -1.0f); }
+        template<std::floating_point type>
+        type X() const { return static_cast<type>(x); }
+        template<std::floating_point type>
+        type Y() const { return static_cast<type>(y); }
+        template<std::floating_point type>
+        type Z() const { return static_cast<type>(z); }
 
+        template<std::floating_point type>
+        vec2<type> XX() const { type f = static_cast<type>(x); return vec2<type>(f, f); }
+        template<std::floating_point type>
+        vec2<type> YY() const { type f = static_cast<type>(y); return vec2(f, f); }
+        template<std::floating_point type>
+        vec2<type> ZZ() const { type f = static_cast<type>(z); return vec2(f, f); }
+        template<std::floating_point type>
+        vec2<type> XY() const { return vec2(static_cast<type>(x), static_cast<type>(y)); }
+        template<std::floating_point type>
+        vec2<type> XZ() const { return vec2(static_cast<type>(x), static_cast<type>(z)); }
+        template<std::floating_point type>
+        vec2<type> YX() const { return vec2(static_cast<type>(y), static_cast<type>(x)); }
+        template<std::floating_point type>
+        vec2<type> YZ() const { return vec2(static_cast<type>(y), static_cast<type>(z)); }
+        template<std::floating_point type>
+        vec2<type> ZX() const { return vec2(static_cast<type>(z), static_cast<type>(x)); }
+        template<std::floating_point type>
+        vec2<type> ZY() const { return vec2(static_cast<type>(z), static_cast<type>(x)); } 
 
-        float x() const { return m_X; }
-        float y() const { return m_Y; }
-        float z() const { return m_Z; }
+        template<std::floating_point type>
+        vec3<type> XXX() const 
+        { 
+            type f1 = static_cast<type>(x);
+            
+            return vec3<type>(f1, f1, f1); 
+        }
+        template<std::floating_point type>
+        vec3<type> YYY() const 
+        { 
+            type f2 = static_cast<type>(y);
+            
+            return vec3<type>(f2, f2, f2); 
+        }
+        template<std::floating_point type>
+        vec3<type> ZZZ() const 
+        { 
+            type f3 = static_cast<type>(z);
+            
+            return vec3<type>(f3, f3, f3); 
+        }
+        template<std::floating_point type>
+        vec3<type> XYZ() const 
+        { 
+            type f1 = static_cast<type>(x);
+            type f2 = static_cast<type>(y);
+            type f3 = static_cast<type>(z);
+            
+            return vec3<type>(f1, f2, f3); 
+        }
+        template<std::floating_point type>
+        vec3<type> ZYX() const 
+        { 
+            type f1 = static_cast<type>(x);
+            type f2 = static_cast<type>(y);
+            type f3 = static_cast<type>(z);
+            
+            return vec3<type>(f3, f2, f1); 
+        }
 
-        vec2 xx() const; 
-        vec2 yy() const; 
-        vec2 zz() const; 
-        vec2 xy() const; 
-        vec2 xz() const; 
-        vec2 yx() const; 
-        vec2 yz() const; 
-        vec2 zx() const; 
-        vec2 zy() const; 
-
-        vec3 xxx() const { return vec3(m_X, m_X, m_X); }
-        vec3 yyy() const { return vec3(m_Y, m_Y, m_Y); }
-        vec3 zzz() const { return vec3(m_Z, m_Z, m_Z); }
-
-        vec3 xyz() const { return vec3(m_X, m_Y, m_Z); }
-        vec3 zyx() const { return vec3(m_Z, m_Y, m_X); }
 
         // Returns a float pointer of the vector's value at the specified index (x -> 0, y -> 1, z -> 2)
         // The specified index is clamped between 0 and 2
-        float* operator[](int index) const
+        F* operator[](int index) 
         {
-            index = MathInternal::clamp(index, 0.0f, 2.0f);
+            index = clamp(index, 0, 2);
 
-            if (index == 0) { return const_cast<float*>(&m_X); }
-            else if (index == 1) { return const_cast<float*>(&m_Y); }
-            else { return const_cast<float*>(&m_Z); }
+            return &data[index];
         }
 
-        float length() const
+        template<Number N>
+        N length() const
         {
-            return std::sqrtf( (m_X * m_X) + (m_Y * m_Y) + (m_Z * m_Z) );
+            return static_cast<N>(std::sqrtf( (x * x) + (y * y) + (z * z) ));
         }
-        float lengthSquared() const 
+        template<Number N>
+        N lengthSquared() const 
         {
-            return (m_X * m_X) + (m_Y * m_Y) + (m_Z * m_Z);
+            return static_cast<N>((x * x) + (y * y) + (z * z));
         }
 
-        float dotProduct(const vec3& other) const 
+        template<Number N>
+        N dotProduct(const vec3& other) const 
         {
-            return (m_X * other.m_X) + (m_Y * other.m_Y) + (m_Z * other.m_Y);
+            return static_cast<N>((x * other.x) + (y * other.y) + (z * other.y));
         }
-        vec3 crossProduct(const vec3& other) const 
+        vec3<F> crossProduct(const vec3<F>& other) const 
         {
             // Le pruduit vectoriel de u par v est 
             // u x v = [ uY x vZ - uZ x vY, -(uX x vZ - uZ x vX), uX x vY - uY x vX ]
 
-            float x = m_Y * other.m_Z - m_Z * other.m_Y;
-            float y = -(m_X * other.m_Z - m_Z * other.m_X);
-            float z = m_X * other.m_Y - m_Y * other.m_X;
+            F x = y * other.z - z * other.y;
+            F y = -(x * other.z - z * other.x);
+            F z = x * other.y - y * other.x;
 
             return vec3(x, y, z);
         }
 
-        float distance(const vec3& other) const
+        template<Number N>
+        N distance(const vec3& other) const
         {
-            return std::sqrtf( (other.m_X - m_X) * (other.m_X - m_X) + (other.m_Y - m_Y) * (other.m_Y - m_Y) +(other.m_Z - m_Z) * (other.m_Z - m_Z) );
+            return static_cast<N>(std::sqrtf( (other.x - x) * (other.x - x) + (other.y - y) * (other.y - y) +(other.z - z) * (other.z - z) ));
         }
-        float distanceSquared(const vec3& other) const
+        template<Number N>
+        N distanceSquared(const vec3& other) const
         {
-            return (other.m_X - m_X) * (other.m_X - m_X) + (other.m_Y - m_Y) * (other.m_Y - m_Y) +(other.m_Z - m_Z) * (other.m_Z - m_Z);
-        }
-
-
-        static float length(const vec3& vec) 
-        {
-            return std::sqrtf( (vec.m_X * vec.m_X) + (vec.m_Y * vec.m_Y) + (vec.m_Z * vec.m_Z) );
-        }
-        static float lengthSquared(const vec3 vec)  
-        {
-            return (vec.m_X * vec.m_X) + (vec.m_Y * vec.m_Y) + (vec.m_Z * vec.m_Z);
+            return static_cast<N>((other.x - x) * (other.x - x) + (other.y - y) * (other.y - y) + (other.z - z) * (other.z - z));
         }
 
-        static float dotProduct(const vec3& vec1, const vec3& vec2)  
+        template<Number N>
+        static N length(const vec3& vec) 
         {
-            return (vec1.m_X * vec2.m_X) + (vec1.m_Y * vec2.m_Y) + (vec1.m_Z * vec2.m_Y);
+            return static_cast<N>(std::sqrtf( (vec.x * vec.x) + (vec.y * vec.y) + (vec.z * vec.z) ));
+        }
+        template<Number N>
+        static N lengthSquared(const vec3 vec)  
+        {
+            return static_cast<N>((vec.x * vec.x) + (vec.y * vec.y) + (vec.z * vec.z));
+        }
+
+        template<Number N>
+        static N dotProduct(const vec3& vec1, const vec3& vec2)  
+        {
+            return static_cast<N>((vec1.x * vec2.x) + (vec1.y * vec2.y) + (vec1.z * vec2.y));
         }
 
         static vec3 crossProduct(const vec3& a, const vec3& b)
@@ -125,152 +192,173 @@ namespace Mathematics
             // Le pruduit vectoriel de u par v est 
             // u x v = [ uY x vZ - uZ x vY, -(uX x vZ - uZ x vX), uX x vY - uY x vX ]
 
-            float x = a.y() * b.z() - a.z() * b.y();
-            float y = -(a.x() * b.z() - a.z() * b.x());
-            float z = a.x() * b.y() - a.y() * b.x();
+            F x = a.y * b.z - a.z * b.y;
+            F y = -(a.x * b.z - a.z * b.x);
+            F z = a.x * b.y - a.y * b.x;
 
             return vec3(x, y, z);
         }
 
-        static float distance(const vec3& vec1, const vec3& vec2) 
+        template<Number N>
+        static N distance(const vec3& vec1, const vec3& vec2) 
         {
-            return std::sqrtf( (vec2.m_X - vec1.m_X) * (vec2.m_X - vec1.m_X) + 
-                               (vec2.m_Y - vec1.m_Y) * (vec2.m_Y - vec1.m_Y) +
-                               (vec2.m_Z - vec1.m_Z) * (vec2.m_Z - vec1.m_Z) );
+            return static_cast<N>(std::sqrtf( (vec2.x - vec1.x) * (vec2.x - vec1.x) + 
+                                              (vec2.y - vec1.y) * (vec2.y - vec1.y) +
+                                              (vec2.z - vec1.z) * (vec2.z - vec1.z) ));
         }
-        static float distanceSquared(const vec3& vec1, const vec3& vec2) 
+        template<Number N>
+        static N distanceSquared(const vec3& vec1, const vec3& vec2) 
         {
-            return (vec2.m_X - vec1.m_X) * (vec2.m_X - vec1.m_X) + 
-                   (vec2.m_Y - vec1.m_Y) * (vec2.m_Y - vec1.m_Y) +
-                   (vec2.m_Z - vec1.m_Z) * (vec2.m_Z - vec1.m_Z);
+            return static_cast<N>((vec2.x - vec1.x) * (vec2.x - vec1.x) + 
+                                  (vec2.y - vec1.y) * (vec2.y - vec1.y) +
+                                  (vec2.z - vec1.z) * (vec2.z - vec1.z));
         }
 
         // well ..., I don't know what this does (thanks Unity), and I'm not motivated tonigth, I'll fix it tomorrow :)
 
-        static vec3 moveTowards(const vec3& current, const vec3& target, float maxDistance)
+        static vec3 moveTowards(const vec3& current, const vec3& target, F maxDistance)
         {
-            float x = target.m_X - current.m_X;
-            float y = target.m_Y - current.m_Y;
-            float z = target.m_Z - current.m_Z;
+            F x = target.x - current.x;
+            F y = target.y - current.y;
+            F z = target.z - current.z;
 
-            float distanceSqr = x * x + y * y + z * z;
+            F distanceSqr = x * x + y * y + z * z;
 
-            if (distanceSqr == 0.0f || (maxDistance >= 0.0f && distanceSqr <= maxDistance * maxDistance))
+            if (distanceSqr == static_cast<F>(0.0) || (maxDistance >= static_cast<F>(0.0) && distanceSqr <= maxDistance * maxDistance))
             {
                 return target;
             }
 
-            float distance = std::sqrtf(distanceSqr);
+            F distance = static_cast<F>(std::sqrtf(distanceSqr));
 
-            return vec3(current.m_X + x / distance * maxDistance,
-                        current.m_Y + y / distance * maxDistance,
-                        current.m_Z + z / distance * maxDistance);
+            return vec3(current.x + x / distance * maxDistance,
+                        current.y + y / distance * maxDistance,
+                        current.z + z / distance * maxDistance);
 
         }
 
 
         vec3& normalized()
         {
-            float l = this->length();
-            if (l > 0.0f) 
+            double l = this->length<double>();
+            if (l > 0.0) 
             {
-                float inverseLength = 1.0f / l;
+                F inverseLength = static_cast<F>(1.0 / l);
 
-                m_X *= inverseLength;
-                m_Y *= inverseLength;
-                m_Z *= inverseLength;
+                x *= inverseLength;
+                y *= inverseLength;
+                z *= inverseLength;
             }
 
             return *this;
         }
 
-        vec3 getUnitVector() const
+        template<std::floating_point type>
+        vec3<type> getUnitVector() const
         {
             vec3 copy = *this;
+            copy = copy.normalized();
 
-            return copy.normalized();
+            vec3<type> vec = vec3<type>(static_cast<type>(copy.x), 
+                                        static_cast<type>(copy.y),
+                                        static_cast<type>(copy.z));
+
+            return vec;
         }
 
-        static vec3 lerp(const vec3& start, const vec3& end, float t)
+        template<std::floating_point f>
+        static vec3 lerp(const vec3& start, const vec3& end, f t)
         {
-            t = MathInternal::clamp01(t);
+            t = clamp01(t);
 
-            return vec3(start.x() + (end.x() - start.x()) * t, start.y() + (end.y() - start.y()) * t, start.z() + (end.z() - start.z()) * t);
+            return vec3(start.x + (end.x - start.x) * t, start.y + (end.y - start.y) * t, start.y + (end.y - start.y) * t);
         }
-        static vec3 lerpUnclamped(const vec3& start, const vec3& end, float t)
+        template<std::floating_point f>
+        static vec3 lerpUnclamped(const vec3& start, const vec3& end, f t)
         {
-            return vec3(start.x() + (end.x() - start.x()) * t, start.y() + (end.y() - start.y()) * t, start.z() + (end.z() - start.z()) * t);
+            return vec3(start.x + (end.x - start.x) * t, start.y + (end.y - start.y) * t, start.y + (end.y - start.y) * t);
         }
 
 
         vec3& operator+=(const vec3& other) 
         { 
-            this->m_X += other.m_X;
-            this->m_Y += other.m_Y;
-            this->m_Z += other.m_Z;
+            this->x += other.x;
+            this->y += other.y;
+            this->z += other.z;
             
             return *this; 
         }
         vec3& operator-=(const vec3& other) 
         { 
-            this->m_X -= other.m_X;
-            this->m_Y -= other.m_Y;
-            this->m_Z -= other.m_Z;
+            this->x -= other.x;
+            this->y -= other.y;
+            this->z -= other.z;
             
             return *this; 
         }
-        vec3& operator*=(float scalar)
+        vec3& operator*=(F scalar)
         {
-            this->m_X *= scalar;
-            this->m_Y *= scalar;
-            this->m_Z *= scalar;
+            this->x *= scalar;
+            this->y *= scalar;
+            this->z *= scalar;
 
             return *this;
         }
-        vec3& operator/=(float scalar)
+        vec3& operator/=(F scalar)
         {
-            if (scalar == 0.0f) return *this;
+            if (scalar == static_cast<F>(0.0)) return *this;
 
-            scalar = 1.0f / scalar;
+            scalar = static_cast<F>(1.0) / scalar;
 
-            this->m_X *= scalar;
-            this->m_Y *= scalar;
-            this->m_Z *= scalar;
+            this->x *= scalar;
+            this->y *= scalar;
+            this->z *= scalar;
 
             return *this;
         }
 
     };
 
-    inline vec3 operator+(const vec3& a, const vec3& b)
+    template<std::floating_point F>
+    inline vec3<F> operator+(const vec3<F>& a, const vec3<F>& b)
     {
-        return vec3(a.x() + b.x(), a.y() + b.y(), a.z() + b.z());
+        return vec3(a.x + b.x, a.y + b.y, a.z + b.z);
     }
-    inline vec3 operator-(const vec3& a, const vec3& b)
+    template<std::floating_point F>
+    inline vec3<F> operator-(const vec3<F>& a, const vec3<F>& b)
     {
-        return vec3(a.x() - b.x(), a.y() - b.y(), a.z() - b.z());
+        return vec3(a.x - b.x, a.y - b.y, a.z - b.z);
     }
-    inline vec3 operator*(const vec3& vec, float scalar)
+    template<std::floating_point F>
+    inline vec3<F> operator*(const vec3<F>& vec, F scalar)
     {
-        return vec3(vec.x() * scalar, vec.y() * scalar, vec.z() * scalar);
+        return vec3(vec.x * scalar, vec.y * scalar, vec.z * scalar);
     }
-    inline vec3 operator/(const vec3& vec, float scalar)
+    template<std::floating_point F>
+    inline vec3<F> operator*(F scalar, const vec3<F>& vec)
     {
-        if (scalar == 0.0f) return vec;
+        return vec3(vec.x * scalar, vec.y * scalar, vec.z * scalar);
+    }
+    template<std::floating_point F>
+    inline vec3<F> operator/(const vec3<F>& vec, F scalar)
+    {
+        if (scalar == static_cast<F>(0.0)) return vec;
 
-        scalar = 1.0f / scalar;
+        scalar = static_cast<F>(1.0) / scalar;
 
-        return vec3(vec.x() * scalar, vec.y() * scalar, vec.z() * scalar);
+        return vec3(vec.x * scalar, vec.y * scalar, vec.z * scalar);
     }
 
-    inline bool operator==(const vec3& a, const vec3& b)
+    template<std::floating_point F>
+    inline bool operator==(const vec3<F>& a, const vec3<F>& b)
     {
-        return std::abs(a.x() - b.x()) < Constants::Epsilon && 
-               std::abs(a.y() - b.y()) < Constants::Epsilon &&
-               std::abs(a.z() - b.z()) < Constants::Epsilon;
+        return static_cast<F>(std::abs(a.x - b.x)) < math::epsilon<F>() && 
+               static_cast<F>(std::abs(a.y - b.y)) < math::epsilon<F>() &&
+               static_cast<F>(std::abs(a.z - b.z)) < math::epsilon<F>();
     }
 
-    inline bool operator!=(const vec3& a, const vec3& b)
+    template<std::floating_point F>
+    inline bool operator!=(const vec3<F>& a, const vec3<F>& b)
     {
         return !(a == b);
     }

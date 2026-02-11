@@ -4,154 +4,188 @@
 
 #include "Math\MathInternal.hpp"
 
-namespace Mathematics
+namespace math
 {
+    template<std::floating_point f>
     struct angle;
 
+    template<std::floating_point F>
     struct vec2
     {
-    private:
-        float m_X, m_Y;
+    public:
+        union 
+        {
+            struct { F x, y; };
+            F data[2];
+        };
 
     public:
         // Constructor that returns a vec2 with x being 0.0, and y being 0.0 
-        vec2() : m_X(0.0f), m_Y(0.0f) {}
+        vec2() : x(static_cast<F>(0.0)), y(static_cast<F>(0.0)) {}
         // Constructor that returns a vec2 with x being vx, and y being vy 
-        vec2(float vx, float vy) : m_X(vx), m_Y(vy) {}
+        vec2(F vx, F vy) : x(vx), y(vy) {}
         // Constructor that returns a vec2 with x being vec.x and y being vec.y
-        vec2(const vec2& vec) : m_X(vec.m_X), m_Y(m_Y) {}
+        template<std::floating_point f>
+        vec2(const vec2<f>& vec) : x(static_cast<F>(vec.x)), y(static_cast<F>(vec.y)) {}
         // Constructor that returns a vec2 from an angle
-        static vec2 fromAngle(const angle& angle);
+        static vec2<F> fromAngle(const angle<F>& angle);
+        static vec2 fromAngle(F angleInDeg) 
+        {
+            return vec2(std::cosf(angleInDeg * math::degToRad<F>()), std::sinf(angleInDeg * math::degToRad<F>()));
+        }
+    
 
         
         // Equivalent of Vec2(0.0f, 0.0f)
-        static vec2 zero() { return vec2(0.0f, 0.0f); }
+        template<std::floating_point f>
+        static vec2<f> zero() { return vec2(static_cast<f>(0.0), static_cast<f>(0.0)); }
         // Equivalent of Vec2(1.0f, 1.0f)
-        static vec2 one() { return vec2(1.0f, 1.0f); }
+        template<std::floating_point f>
+        static vec2 one() { return vec2(static_cast<f>(1.0), static_cast<f>(1.0)); }
         // Equivalent of Vec2(0.0f, 1.0f)
-        static vec2 up() { return vec2(0.0f, 1.0f); }
+        template<std::floating_point f>
+        static vec2 up() { return vec2(static_cast<f>(0.0), static_cast<f>(1.0)); }
         // Equivalent of Vec2(0.0f, -1.0f)
-        static vec2 down() { return vec2(0.0f, -1.0f); }
+        template<std::floating_point f>
+        static vec2 down() { return vec2(static_cast<f>(0.0), static_cast<f>(-1.0)); }
         // Equivalent of Vec2(-1.0f, 0.0f)
-        static vec2 left() { return vec2(-1.0f, 0.0f); }
+        template<std::floating_point f>
+        static vec2 left() { return vec2(static_cast<f>(-1.0), static_cast<f>(0.0)); }
         // Equivalent of Vec2(1.0f, 0.0f)
-        static vec2 right() { return vec2(1.0f,0.0f); }
+        template<std::floating_point f>
+        static vec2 right() { return vec2(static_cast<f>(1.0), static_cast<f>(0.0)); }
 
-        // Returns the X value of the vector
-        float x() const { return m_X; }
-        // Returns the Y value of the vector
-        float y() const { return m_Y; }
         // Returns a new Vec2 made of the X and Y values of the vector
-        vec2 xy() const { return vec2(m_X, m_Y); }
+        template<std::floating_point f>
+        vec2 XY() const { return vec2(static_cast<f>(x), static_cast<f>(y)); }
         // Returns a new Vec2 made of the y and X values of the vector
-        vec2 yx() const { return vec2(m_Y, m_X); }
+        template<std::floating_point f>
+        vec2 YX() const { return vec2(static_cast<f>(y), static_cast<f>(x)); }
         // Returns a new Vec2 made of the X and X values of the vector
-        vec2 xx() const { return vec2(m_X, m_X); }
+        template<std::floating_point f>
+        vec2 XX() const { return vec2(static_cast<f>(x), static_cast<f>(x)); }
         // Returns a new Vec2 made of the Y and Y values of the vector
-        vec2 yy() const { return vec2(m_Y, m_Y); }
+        template<std::floating_point f>
+        vec2 YY() const { return vec2(static_cast<f>(y), static_cast<f>(y)); }
 
         // Returns the same vector, but with its magnitude being 1
         vec2& normalized()
         {
-            float l = this->length();
-            if (l > 0.0f) 
+            double l = this->length<double>();
+            if (l > 0.0) 
             {
-                float inverseLength = 1.0f / l;
+                F inverseLength = static_cast<F>(1.0) / l;
 
-                m_X *= inverseLength; 
-                m_Y *= inverseLength;
+                x *= inverseLength; 
+                y *= inverseLength;
             }
 
             return *this;
         }
 
         // Returns a new vector, that is the same as the original one, but normalized
+        template<std::floating_point f>
         vec2 getUnitVector() const
         {
             vec2 copy = *this;
+            copy = copy.normalized();
 
-            return copy.normalized();
+            copy.x = static_cast<f>(copy.x);
+            copy.y = static_cast<f>(copy.y);
+
+            return copy;
         }
 
         // Returns the magnitude of the vector
-        float length() const
+        template<Number N>
+        N length() const
         {
-            return std::sqrtf( (m_X * m_X) + (m_Y * m_Y) );
+            return static_cast<N>(std::sqrtf( (x * x) + (y * y) ));
         }
         // Returns the magnitude of the vector, but squared
-        float lengthSquared() const
+        template<Number N>
+        N lengthSquared() const
         {
-            return (m_X * m_X) + (m_Y * m_Y);
+            return static_cast<N>((x * x) + (y * y));
         }
         // Returns the dot product of the vector with the one specified as a parameter
-        float dotProduct(const vec2& other) const
+        template<Number N>
+        N dotProduct(const vec2& other) const
         {
-            return (m_X * other.m_X) + (m_Y * other.m_Y); 
+            return static_cast<N>((x * other.x) + (y * other.y)); 
         }
         // Returns the distance between the vector, and the one specified as a parameter
-        float distance(const vec2& other) const
+        template<Number N>
+        N distance(const vec2& other) const
         {
-            return std::sqrtf( (other.m_X - m_X) * (other.m_X - m_X)  +  (other.m_Y - m_Y) * (other.m_Y - m_Y) );
+            return static_cast<N>(std::sqrtf( (other.x - x) * (other.x - x)  +  (other.y - y) * (other.y - y) ));
         }
         // Returns the distance between the vector, and the one specified as a parameter, but squared
-        float distanceSquared(const vec2& other) const
+        template<Number N>
+        N distanceSquared(const vec2& other) const
         {
-            return (other.m_X - m_X) * (other.m_X - m_X)  +  (other.m_Y - m_Y) * (other.m_Y - m_Y);
+            return static_cast<N>((other.x - x) * (other.x - x)  +  (other.y - y) * (other.y - y));
         }
 
-
-        static float length(const vec2& vec) 
+        template<Number N>
+        static N length(const vec2& vec) 
         {
-            return std::sqrtf( (vec.m_X * vec.m_X) + (vec.m_Y * vec.m_Y) );
+            return static_cast<N>(std::sqrtf( (vec.x * vec.x) + (vec.y * vec.y) ));
         }
-        static float lengthSquared(const vec2& vec) 
+        template<Number N>   
+        static N lengthSquared(const vec2& vec) 
         {
-            return (vec.m_X * vec.m_X) + (vec.m_Y * vec.m_Y);
-        }
-
-        static float dotProduct(const vec2& vec1, const vec2& vec2)
-        {
-            return (vec1.m_X * vec2.m_X) + (vec1.m_Y * vec2.m_Y); 
+            return static_cast<N>((vec.x * vec.x) + (vec.y * vec.y));
         }
 
-        static float distance(const vec2& vec1, const vec2& vec2)
+        template<Number N>
+        static N dotProduct(const vec2& vec1, const vec2& vec2)
         {
-            return std::sqrtf( (vec1.m_X - vec2.m_X) * (vec1.m_X - vec2.m_X)  +  (vec1.m_Y - vec2.m_Y) * (vec1.m_Y - vec2.m_Y) );
-        }
-        static float distanceSquared(const vec2& vec1, const vec2& vec2)
-        {
-            return (vec1.m_X - vec2.m_X) * (vec1.m_X - vec2.m_X)  +  (vec1.m_Y - vec2.m_Y) * (vec1.m_Y - vec2.m_Y);
+            return static_cast<N>((vec1.x * vec2.x) + (vec1.y * vec2.y)); 
         }
 
-        static vec2 lerp(const vec2& start, const vec2& end, float t)
+        template<Number N>
+        static N distance(const vec2& vec1, const vec2& vec2)
         {
-            t = MathInternal::clamp01(t);
-            return vec2(start.x() + (end.x() - start.x()) * t, start.y() + (end.y() - start.y()) * t);
+            return static_cast<N>(std::sqrtf( (vec1.x - vec2.x) * (vec1.x - vec2.x)  +  (vec1.y - vec2.y) * (vec1.y - vec2.y) ));
         }
-        static vec2 lerpUnclamped(const vec2& start, const vec2& end, float t)
+        template<Number N>
+        static N distanceSquared(const vec2& vec1, const vec2& vec2)
         {
-            return vec2(start.x() + (end.x() - start.x()) * t, start.y() + (end.y() - start.y()) * t);
+            return static_cast<N>((vec1.x - vec2.x) * (vec1.x - vec2.x)  +  (vec1.y - vec2.y) * (vec1.y - vec2.y));
+        }
+
+        template<std::floating_point f>
+        static vec2<f> lerp(const vec2& start, const vec2& end, f t)
+        {
+            t = clamp01<f>(t);
+            return vec2(static_cast<f>(start.x + (end.x - start.x) * t), static_cast<f>(start.y + (end.y - start.y) * t));
+        }
+        template<std::floating_point f>
+        static vec2<f> lerpUnclamped(const vec2& start, const vec2& end, f t)
+        {
+            return vec2(static_cast<f>(start.x + (end.x - start.x) * t), static_cast<f>(start.y + (end.y - start.y) * t));
         }
         
 
         vec2& operator+=(const vec2& other)
         {
-            this->m_X += other.m_X;
-            this->m_Y += other.m_Y;
+            this->x += other.x;
+            this->y += other.y;
 
             return *this;
         }
         vec2& operator-=(const vec2& other)
         {
-            this->m_X -= other.m_X;
-            this->m_Y -= other.m_Y;
+            this->x -= other.x;
+            this->y -= other.y;
 
             return *this;
         }
         vec2& operator*=(float scalar)
         {
-            this->m_X *= scalar;
-            this->m_Y *= scalar;
+            this->x *= scalar;
+            this->y *= scalar;
 
             return *this;
         }
@@ -161,8 +195,8 @@ namespace Mathematics
 
             scalar = 1.0f / scalar;
 
-            this->m_X *= scalar;
-            this->m_Y *= scalar;
+            this->x *= scalar;
+            this->y *= scalar;
 
             return *this;
         }
@@ -170,12 +204,12 @@ namespace Mathematics
 
         // Returns a float pointer of the vector's value at the specified index (x -> 0, y -> 1)
         // The specified index is clamped between 0 and 1
-        float* operator[](int index)
+        F* operator[](int index)
         {
-            index = MathInternal::clamp01(index);
+            index = clamp01<int>(index);
 
-            if (index == 0) { return &m_X; }
-            else { return &m_Y; }
+            if (index == 0) { return &x; }
+            else { return &y; }
 
         }
         
@@ -183,33 +217,44 @@ namespace Mathematics
 
     // Arithmetic Operators
 
-    inline vec2 operator+(const vec2& a, const vec2& b)
+    template<std::floating_point F>
+    inline vec2<F> operator+(const vec2<F>& a, const vec2<F>& b)
     {
-        return vec2(a.x() + b.x(), a.y() + b.y());
+        return vec2(a.x + b.x, a.y + b.y);
     }
-    inline vec2 operator-(const vec2& a, const vec2& b)
+    template<std::floating_point F>
+    inline vec2<F> operator-(const vec2<F>& a, const vec2<F>& b)
     {
-        return vec2(a.x() - b.x(), a.y() - b.y());
+        return vec2(a.x - b.x, a.y - b.y);
     }
-    inline vec2 operator*(const vec2& vec, float scalar)
+    template<std::floating_point F>
+    inline vec2<F> operator*(const vec2<F>& vec, F scalar)
     {
-        return vec2(vec.x() * scalar, vec.y() * scalar);
+        return vec2(vec.x * scalar, vec.y * scalar);
     }
-    inline vec2 operator/(const vec2& vec, float scalar)
+    template<std::floating_point F>
+    inline vec2<F> operator*(F scalar, const vec2<F>& vec)
     {
-        if (scalar == 0) return vec;
+        return vec2(vec.x * scalar, vec.y * scalar);
+    }
+    template<std::floating_point F>
+    inline vec2<F> operator/(const vec2<F>& vec, F scalar)
+    {
+        if (scalar == static_cast<F>(0.0)) return vec;
 
-        scalar = 1.0f / scalar;
+        scalar = static_cast<F>(1.0f)/ scalar;
 
-        return vec2(vec.x() * scalar, vec.y() * scalar);
+        return vec2(vec.x * scalar, vec.y * scalar);
     }
 
-
-    inline bool operator==(const vec2& a, const vec2& b)
+    template<std::floating_point F>
+    inline bool operator==(const vec2<F>& a, const vec2<F>& b)
     {
-        return std::abs(a.x() - b.x()) < Constants::Epsilon && std::abs(a.y() - b.y()) < Constants::Epsilon;
+        return static_cast<F>(std::abs(a.x - b.x)) < math::epsilon<F>() && 
+               static_cast<F>(std::abs(a.y - b.y)) < math::epsilon<F>();
     }
-    inline bool operator!=(const vec2& a, const vec2& b)
+    template<std::floating_point F>
+    inline bool operator!=(const vec2<F>& a, const vec2<F>& b)
     {
         return !(a == b);
     }

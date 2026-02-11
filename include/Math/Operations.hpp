@@ -1,17 +1,24 @@
 #pragma once 
 
 #include <cmath>
+#include <concepts>
+
+#include "Math\Concepts.hpp"
+#include "Math\MathInternal.hpp"
 
 #include "Math\Angle.hpp"
 #include "Math\Vector2.hpp"
 #include "Math\Vector3.hpp"
 #include "Math\Quaternion.hpp"
 #include "Math\Matrix4x4.hpp"
+#include "Vector3.hpp"
 
-namespace Mathematics
+namespace math
 {
     // ----------- Angle.hpp --------------
-    inline angle angle::angleBetween(const vec2& a, const vec2& b)
+
+    template<std::floating_point F>
+    inline angle<F> angle<F>::angleBetween(const vec2<F>& a, const vec2<F>& b)
     {
         //
         // Soit v et u des vecteurs
@@ -25,123 +32,129 @@ namespace Mathematics
         //          ↑↑↑↑↑↑↑↑↑
         //       comes from here
 
-        float dot = vec2::dotProduct(a.getUnitVector(), b.getUnitVector());
+        F dot = vec2<F>::dotProduct(a.getUnitVector(), b.getUnitVector());
 
-        return angle::fromRadians(std::acos(MathInternal::clamp(dot, -1.0f, 1.0f)));
+        return angle::fromRadians(std::acos(math::clamp<F>(dot, static_cast<F>(-1.0), static_cast<F>(1.0))));
     }
 
     // ----------- Vector2.hpp --------------
 
-    inline vec2 vec2::fromAngle(const angle& angle)
+    template<std::floating_point F>
+    inline vec2<F> vec2<F>::fromAngle(const angle<F>& angle)
     { 
         return vec2(std::cos(angle.asRadians()), std::sin(angle.asRadians())); 
     }
 
     // ----------- Vector3.hpp --------------
 
-    inline vec3::vec3(const vec2& xy) : m_X(xy.x()), m_Y(xy.y()), m_Z(0.0f) {}
-    inline vec3::vec3(const vec2& xy, float vz) : m_X(xy.x()), m_Y(xy.y()), m_Z(vz) {}
+    template<std::floating_point F>
+    inline vec3<F>::vec3(const vec2<F>& xy) : x(xy.x), y(xy.y), z(static_cast<F>(0.0)) {}
+    template<std::floating_point F>
+    inline vec3<F>::vec3(const vec2<F>& xy, F vz) : x(xy.x), y(xy.y), z(vz) {}
 
-    vec3::operator vec2() const { return vec2(m_X, m_Y); }
 
-    inline vec2 vec3::xx() const { return vec2(m_X, m_X); }
-    inline vec2 vec3::yy() const { return vec2(m_Y, m_Y); }
-    inline vec2 vec3::zz() const { return vec2(m_Z, m_Z); }
-    inline vec2 vec3::xy() const { return vec2(m_X, m_Y); }
-    inline vec2 vec3::xz() const { return vec2(m_X, m_Z); }
-    inline vec2 vec3::yx() const { return vec2(m_Y, m_X); }
-    inline vec2 vec3::yz() const { return vec2(m_Y, m_Z); }
-    inline vec2 vec3::zx() const { return vec2(m_Z, m_X); }
-    inline vec2 vec3::zy() const { return vec2(m_Z, m_Y); }
+    // template<std::floating_point F>
+    // inline vec2<F> vec3<F>::XX() const { return vec2(y, y); }
+    // template<std::floating_point F>
+    // inline vec2<F> vec3<F>::YY() const { return vec2(y, y); }
+    // template<std::floating_point F>
+    // inline vec2<F> vec3<F>::ZZ() const { return vec2(z, z); }
+    // template<std::floating_point F>
+    // inline vec2<F> vec3<F>::XY() const { return vec2(x, y); }
+    // template<std::floating_point F>
+    // inline vec2<F> vec3<F>::XZ() const { return vec2(x, z); }
+    // template<std::floating_point F>
+    // inline vec2<F> vec3<F>::YX() const { return vec2(y, x); }
+    // template<std::floating_point F>
+    // inline vec2<F> vec3<F>::YZ() const { return vec2(y, z); }
+    // template<std::floating_point F>
+    // inline vec2<F> vec3<F>::ZX() const { return vec2(z, x); }
+    // template<std::floating_point F>
+    // inline vec2<F> vec3<F>::ZY() const { return vec2(z, y); }
+
 
     // ----------- Quaternion.hpp --------------
 
-    inline quat::quat(float qw, const vec3& xyz) : m_W(qw), m_X(xyz.x()), m_Y(xyz.y()), m_Z(xyz.z()) {}
+    template<std::floating_point F>
+    inline quat<F>::quat(F qw, const vec3<F>& xyz) : w(qw), x(xyz.x), y(xyz.y), z(xyz.z) {}
 
-    inline vec3 quat::xyz() const { return vec3(m_X, m_Y, m_Z); }
-    inline vec3 quat::zyx() const { return vec3(m_Z, m_Y, m_X); }
-
-    inline quat quat::fromAxisAngle(vec3 axis, float angle)
+    template<std::floating_point F>
+    inline quat<F> quat<F>::fromAxisAngle(vec3<F> axis, F angle)
     {
         axis = axis.normalized();
-        float theta = (angle * Constants::DegToRad) / 2.0f;
+        F theta = (angle * math::degToRad<F>()) / static_cast<F>(2.0);
 
-        float w = std::cos(theta);
-        float x = axis.x() * std::sin(theta);
-        float y = axis.y() * std::sin(theta);
-        float z = axis.z() * std::sin(theta);
+        F w = static_cast<F>(std::cos(theta));
+        F x = axis.x * static_cast<F>(std::sin(theta));
+        F y = axis.y * static_cast<F>(std::sin(theta));
+        F z = axis.z * static_cast<F>(std::sin(theta));
 
         return quat(w, x, y, z);
     }
 
-    inline quat quat::fromEuler(const vec3& rotation)
+    template<std::floating_point F>
+    inline quat<F> quat<F>::fromEuler(const vec3<F>& rotation)
     {
         // the Hamilton product is still not implemented
 
-        float phi = (rotation.x() * Constants::DegToRad) / 2.0f;
-        float theta = (rotation.y() * Constants::DegToRad) / 2.0f;
-        float psi = (rotation.z() * Constants::DegToRad) / 2.0f;
+        F phi = (rotation.x * math::degToRad<F>()) / static_cast<F>(2.0);
+        F theta = (rotation.y * math::degToRad<F>()) / static_cast<F>(2.0);
+        F psi = (rotation.z * math::degToRad<F>()) / static_cast<F>(2.0);
 
-        float cosPhi = std::cosf(phi);
-        float cosTheta = std::cosf(theta);
-        float cosPsi = std::cosf(psi);
-        float sinPhi = std::sinf(phi);
-        float sinTheta = std::sinf(theta);
-        float sinPsi = std::sinf(psi);
+        F cosPhi = static_cast<F>(std::cosf(phi));
+        F cosTheta = static_cast<F>(std::cosf(theta));
+        F cosPsi = static_cast<F>(std::cosf(psi));
+        F sinPhi = static_cast<F>(std::sinf(phi));
+        F sinTheta = static_cast<F>(std::sinf(theta));
+        F sinPsi = static_cast<F>(std::sinf(psi));
 
-        float w = cosPhi * cosTheta * cosPsi + sinPhi * sinTheta * sinPsi;
-        float x = sinPhi * cosTheta * cosPsi - cosPhi * sinTheta * sinPsi;
-        float y = cosPhi * sinTheta * cosPsi + sinPhi * cosTheta * sinPsi;
-        float z = cosPhi * cosTheta * sinPsi - sinPhi * sinTheta * cosPsi;
+        F w = cosPhi * cosTheta * cosPsi + sinPhi * sinTheta * sinPsi;
+        F x = sinPhi * cosTheta * cosPsi - cosPhi * sinTheta * sinPsi;
+        F y = cosPhi * sinTheta * cosPsi + sinPhi * cosTheta * sinPsi;
+        F z = cosPhi * cosTheta * sinPsi - sinPhi * sinTheta * cosPsi;
 
         return quat(w, x, y, z);
     }
 
-    inline vec3 quat::rotatePointViaQuat(const vec3 &point, const quat &rot)
+    template<std::floating_point F>
+    inline vec3<F> quat<F>::toEuler() const
     {
-        quat qPoint = quat(0.0f, point.xyz());
-        
-        vec3 rotated = (rot * qPoint * rot.getConjugatedQuat()).xyz();
-
-        return rotated;
-    }
-
-    inline vec3 quat::toEuler() const
-    {
-        float x = std::asinf(2 * (m_W * m_X - m_X * m_Z));
-        float y = std::atan2f(2 * (m_W * m_X + m_Y * m_X), 1 - 2 * (m_X * m_X + m_Y * m_Y));
-        float z = std::atan2f(2 * (m_W * m_Z + m_X * m_Y), 1 - 2 * (m_X * m_X + m_Z * m_Z));
+        F x = static_cast<F>(std::asin(2 * (w * x - x * z)));
+        F y = static_cast<F>(std::atan2(2 * (w * x + y * x), 1 - 2 * (x * x + y * y)));
+        F z = static_cast<F>(std::atan2(2 * (w * z + x * y), 1 - 2 * (x * x + z * z)));
 
         return vec3(x, y, z);
     }
 
-    inline quat operator*(const quat &a, const quat &b)
+    template<std::floating_point F>
+    inline quat<F> operator*(const quat<F> &a, const quat<F> &b)
     {
         quat qa = a.getUnitQuat();
         quat qb = b.getUnitQuat();
 
-        float w = qa.w() * qb.w() - vec2::dotProduct(qa.xyz(), qb.xyz()); 
+        F w = qa.w * qb.w - vec2<F>::dotProduct(qa.xyz(), qb.xyz()); 
 
-        vec3 xyz = qb.xyz() * qa.w() + qa.xyz() * qb.w() + vec3::crossProduct(qa.xyz(), qb.xyz());
+        vec3 xyz = qb.xyz() * qa.w + qa.xyz() * qb.w + vec3<F>::crossProduct(qa.xyz(), qb.xyz());
 
         return quat(w, xyz);
     }
 
-    inline mat4 quat::toMat4() const 
+    template<std::floating_point F>
+    inline mat4 quat<F>::toMat4() const 
     {
-        float xx = m_X * m_X;
-        float yy = m_Y * m_Y;
-        float zz = m_Z * m_Z;
-        float xy = m_X * m_Y;
-        float wz = m_W * m_Z;
-        float wy = m_W * m_Y;
-        float wx = m_W * m_X;
-        float xz = m_X * m_Z;
-        float yz = m_Y * m_Z;
+        F xx = x * x;
+        F yy = y * y;
+        F zz = z * z;
+        F xy = x * y;
+        F wz = w * z;
+        F wy = w * y;
+        F wx = w * x;
+        F xz = x * z;
+        F yz = y * z;
 
-        return mat4(1 - 2 * (yy + zz), 2 * (xy - wz), 2 * (xz + wy), 0.0f,
-                    2 * (xy + wz), 1 - 2 * (xx + zz), 2 * (yz - wx), 0.0f,
-                    2 * (xz - wy), 2 * (yz + wx), 1 - 2 * (xx + yy), 0.0f,
-                    0.0f, 0.0f, 0.0f, 1.0f);
+        return mat4(1 - 2 * (yy + zz), 2 * (xy - wz)    , 2 * (xz + wy)    , 0.0f,
+                    2 * (xy + wz)    , 1 - 2 * (xx + zz), 2 * (yz - wx)    , 0.0f,
+                    2 * (xz - wy)    , 2 * (yz + wx)    , 1 - 2 * (xx + yy), 0.0f,
+                    0.0f             , 0.0f             , 0.0f             , 1.0f);
     }
 }

@@ -1,81 +1,84 @@
 #pragma once
 
 #include <cmath>
+#include <concepts>
 
-#include "Math\Constants.hpp"
 #include "Math\MathInternal.hpp"
+#include "Math\Concepts.hpp"
 
-namespace Mathematics
+namespace math
 {
+    template<std::floating_point F>
     struct vec2;
 
+    template<std::floating_point F>
     struct angle
     {
     private:
-        float m_Radians;
+        F m_Radians;
 
-        explicit angle(float inRad) : m_Radians(inRad) {}
+        explicit angle(F inRad) : m_Radians(inRad) {}
 
     public: 
         // Constructors
 
-        // Returns an angle from the specifief DEGREES
-        static angle fromRadians(float rad) { return angle(rad); } 
+        // Returns an angle from the specified DEGREES
+        static angle fromRadians(F rad) { return angle(rad); } 
         // Returns an angle from the specified RADIANS
-        static angle fromDegrees(float deg) { return angle(deg * Constants::DegToRad); }
+        static angle fromDegrees(F deg) { return angle(deg * math::degToRad<F>()); }
 
         // Getters
 
-        float asDegrees() const { return m_Radians * Constants::RadToDeg; }
-        float asRadians() const { return m_Radians; }
+        F asDegrees() const { return m_Radians * math::radToDeg<F>(); }
+        F asRadians() const { return m_Radians; }
 
 
         angle& normalize()
         {
-            m_Radians = MathInternal::mod(m_Radians, 2.0f * Constants::PI);
-            if (m_Radians < 0) m_Radians += 2.0f * Constants::PI;
+            m_Radians = static_cast<F>(std::fmod(m_Radians, math::twoPi<F>()));
+            if (m_Radians < 0) m_Radians += math::twoPi<F>();
             return *this;
         }
 
-        static inline angle angleBetween(const vec2& a, const vec2& b);
+        static inline angle angleBetween(const vec2<F>& a, const vec2<F>& b);
 
         // Lerp Methods
 
         // Linearly interpolates between two DEGREES
-        static inline angle lerp(float startDeg, float endDeg, float t)
+        static inline angle lerp(F startDeg, F endDeg, F t)
         {
-            t = MathInternal::clamp01(t);
-            return angle::fromDegrees(MathInternal::lerp(startDeg, endDeg, t));
+            t = math::clamp01(t);
+            return angle::fromDegrees(math::lerp(startDeg, endDeg, t));
         }
 
-        static inline angle lerp(const angle& start, const angle& end, float t)
+        static inline angle lerp(const angle& start, const angle& end, F t)
         {
-            t = MathInternal::clamp01(t);
-            return angle::fromRadians(MathInternal::lerp(start.asRadians(), end.asRadians(), MathInternal::clamp01(t)));
+            t = clamp01(t);
+            return angle::fromRadians(math::lerp(start.asRadians(), end.asRadians(), clamp01(t)));
         }
 
         // Linearly interpolates between two DEGREES, by taking the shortest path
-        static inline angle shortLerp(float startDeg, float endDeg, float t)
+        static inline angle shortLerp(F startDeg, F endDeg, F t)
         {
             return shortLerp(angle::fromDegrees(startDeg), angle::fromDegrees(endDeg), t);
         }
 
         static inline angle shortLerp(const angle& start, const angle& end, float t) 
         {
-            float s = start.asRadians();
-            float e = end.asRadians();
+            F s = start.asRadians();
+            F e = end.asRadians();
 
-            t = MathInternal::clamp01(t);
-            float delta = MathInternal::mod(e - s, 2.0f * Constants::PI);
+            t = math::clamp01(t);
+            F delta = static_cast<F>(std::fmod(e - s, math::twoPi<F>()));
 
-            float fullCircle = 2.0f * Constants::PI;
-            delta = MathInternal::mod(delta, fullCircle);
+            F fullCircle = math::twoPi<F>();
+            delta = static_cast<F>(std::fmod(delta, fullCircle));
 
-            if (delta > Constants::PI) delta -= fullCircle;
-            if (delta < -Constants::PI) delta += fullCircle;
+            if (delta > math::pi<F>()) delta -= fullCircle;
+            if (delta < -math::pi<F>()) delta += fullCircle;
 
             // On peut utiliser Mathf sans erreur
-            return angle::fromRadians(s + delta * MathInternal::clamp01(t));
+            return angle::fromRadians(s + delta * clamp01(t));
         }
 
 
@@ -108,53 +111,57 @@ namespace Mathematics
 
     // Arithmetic Operators
 
-    inline angle operator+(const angle& a, const angle& b) 
+    template<std::floating_point F>
+    inline angle<F> operator+(const angle<F>& a, const angle<F>& b) 
     {
-        return angle::fromRadians(a.asRadians() + b.asRadians());
+        return angle<F>::fromRadians(a.asRadians() + b.asRadians());
     }
-    inline angle operator-(const angle& a, const angle& b) 
+    template<std::floating_point F>
+    inline angle<F> operator-(const angle<F>& a, const angle<F>& b) 
     {
-        return angle::fromRadians(a.asRadians() - b.asRadians());
+        return angle<F>::fromRadians(a.asRadians() - b.asRadians());
     }
-    inline angle operator*(const angle& angle, float scalar) 
+    template<std::floating_point F>
+    inline angle<F> operator*(const angle<F>& ang, F scalar) 
     {
-        return angle::fromRadians(angle.asRadians() * scalar);
+        return angle<F>::fromRadians(ang.asRadians() * scalar);
     }
-    inline angle operator/(const angle& angle, float scalar) 
+    template<std::floating_point F>
+    inline angle<F> operator*(F scalar, const angle<F>& ang) 
     {
-        if (scalar == 0.0f) return angle;
+        return angle<F>::fromRadians(ang.asRadians() * scalar);
+    }
+    template<std::floating_point F>
+    inline angle<F> operator/(const angle<F>& ang, F scalar) 
+    {
+        if (scalar == static_cast<F>(0.0)) return ang;
 
-        return angle::fromRadians(angle.asRadians() / scalar);
+        return angle<F>::fromRadians(ang.asRadians() / scalar);
     }
 
-    inline bool operator>(const angle& a, const angle& b) 
+    template<std::floating_point F>
+    inline bool operator>(const angle<F>& a, const angle<F>& b) 
     {
         return a.asRadians() > b.asRadians();
     }
-    inline bool operator<(const angle& a, const angle& b) 
+    template<std::floating_point F>
+    inline bool operator<(const angle<F>& a, const angle<F>& b) 
     {
         return a.asRadians() < b.asRadians();
     }
 
-    inline bool operator==(const angle& a, const angle& b)
+    template<std::floating_point F>
+    inline bool operator==(const angle<F>& a, const angle<F>& b)
     {
-        return MathInternal::abs(a.asRadians() - b.asRadians()) < Constants::Epsilon;
+        return static_cast<F>(std::abs(a.asRadians() - b.asRadians())) < math::epsilon<F>();
     }
-    inline bool operator!=(const angle& a, const angle& b)
+    template<std::floating_point F>
+    inline bool operator!=(const angle<F>& a, const angle<F>& b)
     {
         return !(a == b);
     }
 
-    // User-literals operators
-
-    inline angle operator"" _deg(long double d) 
-    {
-        return angle::fromDegrees(static_cast<float>(d));
-    }
-    inline angle operator"" _rad(long double d) 
-    {
-        return angle::fromRadians(static_cast<float>(d));
-    }
+    
 
     
 }
