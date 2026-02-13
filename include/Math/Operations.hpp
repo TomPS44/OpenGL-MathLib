@@ -39,11 +39,11 @@ namespace math
 
     // ----------- Vector2.hpp --------------
 
-    template<std::floating_point F>
-    inline vec2<F> vec2<F>::fromAngle(const angle<F>& angle)
-    { 
-        return vec2(std::cos(angle.asRadians()), std::sin(angle.asRadians())); 
-    }
+    // template<std::floating_point F>
+    // inline vec2<F> vec2<F>::fromAngle(const angle<F>& angle)
+    // { 
+    //     return vec2(std::cos(angle.asRadians()), std::sin(angle.asRadians())); 
+    // }
 
     // ----------- Vector3.hpp --------------
 
