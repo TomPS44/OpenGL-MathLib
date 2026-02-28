@@ -27,7 +27,7 @@ namespace math
 
     template<std::floating_point F>
     template<std::floating_point f>
-    inline mat4<f> mat4<F>::toMat() const
+    inline mat4<f> mat4<F>::as() const
     {
         mat4<f> res;
 

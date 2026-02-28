@@ -44,41 +44,41 @@ namespace math
         static vec3 backward();
 
 
-        template<std::floating_point type>
+        template<std::floating_point type = F>
         type X() const;
-        template<std::floating_point type>
+        template<std::floating_point type = F>
         type Y() const;
-        template<std::floating_point type>
+        template<std::floating_point type = F>
         type Z() const;
 
-        template<std::floating_point type>
+        template<std::floating_point type = F>
         vec2<type> XX() const; 
-        template<std::floating_point type>
+        template<std::floating_point type = F>
         vec2<type> YY() const;
-        template<std::floating_point type>
+        template<std::floating_point type = F>
         vec2<type> ZZ() const;
-        template<std::floating_point type>
+        template<std::floating_point type = F>
         vec2<type> XY() const;
-        template<std::floating_point type>
+        template<std::floating_point type = F>
         vec2<type> XZ() const;
-        template<std::floating_point type>
+        template<std::floating_point type = F>
         vec2<type> YX() const;
-        template<std::floating_point type>
+        template<std::floating_point type = F>
         vec2<type> YZ() const;
-        template<std::floating_point type>
+        template<std::floating_point type = F>
         vec2<type> ZX() const;
-        template<std::floating_point type>
+        template<std::floating_point type = F>
         vec2<type> ZY() const;
 
-        template<std::floating_point type>
+        template<std::floating_point type = F>
         vec3<type> XXX() const;
-        template<std::floating_point type>
+        template<std::floating_point type = F>
         vec3<type> YYY() const;
-        template<std::floating_point type>
+        template<std::floating_point type = F>
         vec3<type> ZZZ() const;
-        template<std::floating_point type>
+        template<std::floating_point type = F>
         vec3<type> XYZ() const;
-        template<std::floating_point type>
+        template<std::floating_point type = F>
         vec3<type> ZYX() const;
 
 
@@ -111,9 +111,8 @@ namespace math
         template<Number N>
         static N distance(const vec3& vec1, const vec3& vec2);
         template<Number N>
-        static N distanceSquared(const vec3& vec1, const vec3& vec2) ;
+        static N distanceSquared(const vec3& vec1, const vec3& vec2);
 
-        
         vec3& normalized();
 
         template<std::floating_point type = F>

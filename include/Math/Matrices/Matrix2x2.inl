@@ -61,7 +61,7 @@ namespace math
     
     template<std::floating_point F>
     template<std::floating_point f>
-    inline mat2<f> mat2<F>::toMat() const
+    inline mat2<f> mat2<F>::as() const
     {
         mat2<f> res;
 

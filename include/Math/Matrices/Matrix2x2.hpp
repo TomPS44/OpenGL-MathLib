@@ -30,7 +30,7 @@ namespace math
         mat2();
 
         template<std::floating_point f>
-        mat2<f> toMat() const;
+        mat2<f> as() const;
 
         static mat2 rotateZ(F zAngDeg);
 

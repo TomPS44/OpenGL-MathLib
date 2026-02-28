@@ -147,13 +147,13 @@ namespace math
     template<Number N>
     inline N epsilon()
     {
-        return static_cast<N>(0.1e+06);
+        return static_cast<N>(0.1e-06);
     }
 
     template<std::floating_point F>
     inline bool nearlyEqual(F lhs, F rhs)
     {
-        return std::abs(rhs - lhs) < static_cast<F>(0.1e+06);
+        return std::abs(rhs - lhs) < static_cast<F>(1e-06);
     }
     
 }

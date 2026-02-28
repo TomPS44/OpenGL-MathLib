@@ -6,6 +6,12 @@
 
 namespace math
 {
+    template<std::floating_point F>
+    struct quat;
+
+    template<std::floating_point F>
+    struct mat2;
+
     // A struct used to represent a Matrix3x3, with the values being stored in colum-major
     //
     // ( [0][0] [1][0] [2][0] )
@@ -36,7 +42,10 @@ namespace math
         static mat3 rotateX(F xAngDeg);
         static mat3 rotateY(F yAngDeg);
         static mat3 rotateZ(F zAngDeg);
-        // static mat3 rotate(const quat<F>& rotationQuat);
+        /// @brief A method to generate a mat3 from a quaternion
+        /// @param rotationQuat The quaternion that contains the wanted rotation
+        /// @return A mat3 coming from the rotationQuat quaternion
+        static mat3 fromQuat(const quat<F>& rotationQuat);
         
 
         template<Number N>
@@ -54,13 +63,23 @@ namespace math
         template<std::floating_point f = F>
         mat3<f> getComatrix() const;
 
+        template<std::floating_point f = F>
+        mat3<f> getAdjugateMat() const;
+
         static mat3<F> diagonal(F diagonal);
 
         static mat3<F> identity();
         
 
         F& at(int row, int col);
-        F at(int row, int col) const;        
+        F at(int row, int col) const;  
+        
+
+        template<Number N = F>
+        N getMinor(int row, int col) const;
+
+        template<std::floating_point f = F>
+        mat2<f> getSubmatrix(int row, int col) const;
     };
 
     template<std::floating_point F>

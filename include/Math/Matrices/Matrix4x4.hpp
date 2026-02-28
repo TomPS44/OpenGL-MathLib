@@ -5,6 +5,8 @@
 
 namespace math
 {
+    
+
     // A struct used to represent a Matrix4x4, with the values being stored in colum-major
     //
     // ( [0][0] [1][0] [2][0] [3][0] )
@@ -32,7 +34,7 @@ namespace math
         mat4();
 
         template<std::floating_point f>
-        mat4<f> toMat() const;
+        mat4<f> as() const;
 
         static mat4 diagonal(F diagonal);
 

@@ -1,8 +1,21 @@
 #include <concepts>
 #include <cmath>
 
+#include <stdint.h>
+
 namespace math
 {
+    template<std::floating_point F>
+    inline quat<F>::quat()
+    {
+        F f0 = static_cast<F>(0.0);
+
+        w = f0;
+        x = f0;
+        y = f0;
+        z = f0;
+    }
+
     template<std::floating_point F>
     inline quat<F>::quat(F qw, const vec3<F>& xyz)
     {
@@ -27,6 +40,12 @@ namespace math
         F f0 = static_cast<F>(0.0);
 
         return quat<F>(static_cast<F>(1.0), f0, f0, f0);
+    }
+
+    template<std::floating_point F>
+    inline quat<F> quat<F>::getPureQuat(const vec3<F>& vec)
+    {
+        return quat<F>(static_cast<F>(0.0), vec.x, vec.y, vec.z);
     }
 
     template<std::floating_point F>
@@ -117,6 +136,39 @@ namespace math
     }
 
     template<std::floating_point F>
+    inline quat<F>& quat<F>::inversed()
+    {
+        quat<F> conj = this->getConjugatedQuat();
+        F l = this->lengthSquared();
+
+        if (l > math::epsilon<F>())
+        {
+            w = conj.w / l;
+            x = conj.x / l; 
+            y = conj.y / l; 
+            z = conj.z / l; 
+        }
+
+        return *this;
+    }
+
+    template<std::floating_point F>
+    template<std::floating_point f>
+    inline quat<f> quat<F>::getInversedQuat() const
+    {
+        quat copy = *this;
+
+        copy = copy.inversed();
+
+        quat<f> conjCopy = quat<f>(static_cast<f>(copy.w),
+                                   static_cast<f>(copy.x),
+                                   static_cast<f>(copy.y),
+                                   static_cast<f>(copy.z));
+
+        return conjCopy;
+    }
+
+    template<std::floating_point F>
     template<Number N>
     inline N quat<F>::length() const 
     {
@@ -143,6 +195,15 @@ namespace math
     {
         return static_cast<N>( (quat.w * quat.w) + (quat.x * quat.x) + (quat.y * quat.y) + (quat.z * quat.z) );
     }
+
+
+    template<std::floating_point F>
+    template<Number N>
+    inline N quat<F>::dotProduct(const quat<F>& a, const quat<F>& b)  
+    {
+        return static_cast<N>( (a.w * b.w) + (a.x * b.x) + (a.y * b.y) + (a.z * b.z) );
+    }
+    
 
     template<std::floating_point F>
     inline quat<F> quat<F>::fromAxisAngle(const vec3<F> axis, F angle)
@@ -185,7 +246,7 @@ namespace math
         vec3<F> axis = vec3<F>::crossProduct(localForward, forward);
 
         // 5. Formule directe pour le quaternion de rotation entre deux vecteurs
-        // q.w = sqrt(length(v1)^2 * length(v2)^2) + dot(v1, v2)
+        // q.w = sqrt( length(v1)^2 * length(v2)^2 ) + dot(v1, v2)
         // q.xyz = cross(v1, v2)
         F s = std::sqrt((static_cast<F>(1.0) + dot) * static_cast<F>(2.0));
         F invS = static_cast<F>(1.0) / s;
@@ -211,13 +272,19 @@ namespace math
         F cy = std::cos(y); F sy = std::sin(y);
         F cz = std::cos(z); F sz = std::sin(z);
 
-        // Formule pour l'ordre YXZ
+        // Pour ordre YXZ
         return quat<F>(
-            cx * cy * cz + sx * sy * sz, // w
-            sx * cy * cz + cx * sy * sz, // x
-            cx * sy * cz - sx * cy * sz, // y
-            cx * cy * sz - sx * sy * cz  // z
+            cx * cy * cz + sx * sy * sz, 
+            sx * cy * cz + cx * sy * sz, 
+            cx * sy * cz - sx * cy * sz, 
+            cx * cy * sz - sx * sy * cz  
         );
+    }
+
+    template<std::floating_point F>
+    inline quat<F> quat<F>::fromEuler(F vx, F vy, F vz)
+    {
+        return quat<F>::fromEuler( vec3<F>(vx, vy, vz) );
     }
 
     template<std::floating_point F>
@@ -247,11 +314,92 @@ namespace math
         return angles;
     }
 
+
     template<std::floating_point F>
-    inline quat<F> operator*(const quat<F> &a, const quat<F> &b)
+    inline vec3<F> quat<F>::rotatePoint(const vec3<F>& point, const quat<F>& rot)
     {
-        return quat<F>
-        (
+        quat<F> q = rot.getUnitQuat();
+
+        vec3<F> qVec = { q.x, q.y, q.z };
+
+        vec3<F> t = vec3<F>::crossProduct(qVec, point) * static_cast<F>(2.0);
+
+        vec3<F> result = point + (t * q.w) + vec3<F>::crossProduct(qVec, t);
+
+        return result;
+    }
+    template<std::floating_point F>
+    inline vec3<F> quat<F>::rotatePointAroundPivot(const vec3<F>& point, const vec3<F> pivot, const quat<F>& rot)
+    {
+        vec3<F> vLocal = point - pivot;
+
+        vec3<F> vRotated = quat<F>::rotatePoint(point, rot);
+
+        vec3<F> result = vRotated + pivot;
+
+        return result;
+    }
+
+    template<std::floating_point F>
+    inline vec3<F> quat<F>::rotatePoint(const vec3<F>& point) const
+    {
+        return quat<F>::rotatePoint(point, *this);
+    }
+    template<std::floating_point F>
+    inline vec3<F> quat<F>::rotatePointAroundPivot(const vec3<F>& point, const vec3<F>& pivot) const
+    {
+        return quat<F>::rotatePointAroundPivot(point, pivot, *this);
+    }
+
+    
+    template<std::floating_point F>
+    template<std::floating_point f>
+    inline mat3<f> quat<F>::toMat3() const 
+    {
+        F xx = static_cast<f>(x * x);
+        F yy = static_cast<f>(y * y);
+        F zz = static_cast<f>(z * z);
+        F xy = static_cast<f>(x * y);
+        F wz = static_cast<f>(w * z);
+        F wy = static_cast<f>(w * y);
+        F wx = static_cast<f>(w * x);
+        F xz = static_cast<f>(x * z);
+        F yz = static_cast<f>(y * z);
+
+        F f0 = static_cast<F>(0.0);
+
+        return mat3<f>(1 - 2 * (yy + zz), 2 * (xy - wz)    , 2 * (xz + wy),
+                       2 * (xy + wz)    , 1 - 2 * (xx + zz), 2 * (yz - wx),
+                       2 * (xz - wy)    , 2 * (yz + wx)    , 1 - 2 * (xx + yy));
+    }
+
+    template<std::floating_point F>
+    template<std::floating_point f>
+    inline mat4<f> quat<F>::toMat4() const 
+    {
+        F xx = static_cast<f>(x * x);
+        F yy = static_cast<f>(y * y);
+        F zz = static_cast<f>(z * z);
+        F xy = static_cast<f>(x * y);
+        F wz = static_cast<f>(w * z);
+        F wy = static_cast<f>(w * y);
+        F wx = static_cast<f>(w * x);
+        F xz = static_cast<f>(x * z);
+        F yz = static_cast<f>(y * z);
+
+        F f0 = static_cast<F>(0.0);
+
+        return mat4<f>(1 - 2 * (yy + zz), 2 * (xy - wz)    , 2 * (xz + wy)    , f0,
+                       2 * (xy + wz)    , 1 - 2 * (xx + zz), 2 * (yz - wx)    , f0,
+                       2 * (xz - wy)    , 2 * (yz + wx)    , 1 - 2 * (xx + yy), f0,
+                       f0               , f0               , f0               , static_cast<F>(1.0));
+    }
+
+
+    template<std::floating_point F>
+    inline quat<F> operator*(const quat<F>& a, const quat<F>& b)
+    {
+        return quat<F>(
             a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z,
             a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
             a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
@@ -260,23 +408,25 @@ namespace math
     }
 
     template<std::floating_point F>
-    inline mat4<F> quat<F>::toMat4() const 
+    inline quat<F> operator*(const quat<F>& rot, F scalar)
     {
-        F xx = x * x;
-        F yy = y * y;
-        F zz = z * z;
-        F xy = x * y;
-        F wz = w * z;
-        F wy = w * y;
-        F wx = w * x;
-        F xz = x * z;
-        F yz = y * z;
-
-        F f0 = static_cast<F>(0.0);
-
-        return mat4(1 - 2 * (yy + zz), 2 * (xy - wz)    , 2 * (xz + wy)    , f0,
-                    2 * (xy + wz)    , 1 - 2 * (xx + zz), 2 * (yz - wx)    , f0,
-                    2 * (xz - wy)    , 2 * (yz + wx)    , 1 - 2 * (xx + yy), f0,
-                    f0               , f0               , f0               , static_cast<F>(1.0));
+        return quat<F>(
+            rot.w * scalar,
+            rot.x * scalar,
+            rot.y * scalar,
+            rot.z * scalar
+        );
     }
+
+    template<std::floating_point F>
+    inline quat<F> operator*(F scalar, const quat<F>& rot)
+    {
+        return quat<F>(
+            rot.w * scalar,
+            rot.x * scalar,
+            rot.y * scalar,
+            rot.z * scalar
+        );
+    }
+
 }
