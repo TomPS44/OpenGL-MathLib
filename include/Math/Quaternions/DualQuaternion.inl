@@ -80,8 +80,8 @@ namespace math
         {
             F invLen = static_cast<F>(1.0) / l;
 
-            real *= invLen;
-            dual *= invLen;
+            real = real * invLen;
+            dual = dual * invLen;
         }
 
         return *this;
@@ -115,8 +115,8 @@ namespace math
     template <std::floating_point F>
     inline dualQuat<F>& dualQuat<F>::conjugated()
     {
-        real *= static_cast<F>(-1.0);
-        dual *= static_cast<F>(-1.0);
+        real = real * static_cast<F>(-1.0);
+        dual = dual * static_cast<F>(-1.0);
 
         return *this;
     }
@@ -279,10 +279,10 @@ namespace math
         
         if (quat<F>::dotProduct(start.real, end.real) < static_cast<F>(0.0)) 
         {
-            trueEnd *= static_cast<F>(-1.0);
+            trueEnd = trueEnd * static_cast<F>(-1.0);
         }
         
-        dualQuat<F> interp = { (static_cast<F>(1.0) - t) * start, t * trueEnd };
+        dualQuat<F> interp = (static_cast<F>(1.0) - t) * start + t * trueEnd;
         
         return interp.normalized();
     }
@@ -298,12 +298,34 @@ namespace math
 
 
     template <std::floating_point F>
+    dualQuat<F> operator*(const dualQuat<F>& a, const dualQuat<F>& b)
+    {
+        dualQuat<F> res;
+
+        res.real = a.real * b.real;
+        res.dual = a.real * b.dual + a.dual * b.real;
+
+        return res;
+    }
+
+    template <std::floating_point F>
+    dualQuat<F> operator+(const dualQuat<F>& a, const dualQuat<F>& b)
+    {
+        dualQuat<F> res;
+
+        res.real = a.real + b.real;
+        res.dual = a.dual + b.dual;
+
+        return res;
+    }
+
+    template <std::floating_point F>
     dualQuat<F> operator*(const dualQuat<F>& dQuat, F scalar)
     {
         dualQuat<F> res = dQuat;
 
-        res.real *= scalar;
-        res.dual *= scalar;
+        res.real = res.real * scalar;
+        res.dual = res.dual * scalar;
 
         return res;
     }
@@ -313,8 +335,8 @@ namespace math
     {
         dualQuat<F> res = dQuat;
 
-        res.real *= scalar;
-        res.dual *= scalar;
+        res.real = res.real * scalar;
+        res.dual = res.dual * scalar;
 
         return res;
     }

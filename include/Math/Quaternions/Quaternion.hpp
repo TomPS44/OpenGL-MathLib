@@ -71,6 +71,7 @@ namespace math
 
         static quat fromAxisAngle(const vec3<F> axis, F angle);
 
+        static quat lookAtFree(const vec3<F>& eye, const vec3<F>& target);
         static quat lookAt(const vec3<F>& eye, const vec3<F>& target, const vec3<F>& up);
 
         static quat fromEuler(const vec3<F>& rotation);
@@ -78,6 +79,12 @@ namespace math
 
         static vec3<F> rotatePoint(const vec3<F>& point, const quat<F>& rot);
         static vec3<F> rotatePointAroundPivot(const vec3<F>& point, const vec3<F> pivot, const quat<F>& rot);
+
+        static quat<F> lerp(const quat<F>& start, const quat<F>& end, F t);
+        static quat<F> lerpUnclamped(const quat<F>& start, const quat<F>& end, F t);
+
+        static quat<F> slerp(const quat<F>& start, const quat<F>& end, F t);
+        static quat<F> slerpUnclamped(const quat<F>& start, const quat<F>& end, F t);
 
         vec3<F> toEuler() const;
 
@@ -89,6 +96,9 @@ namespace math
 
     template<std::floating_point F>
     inline quat<F> operator*(const quat<F>& a, const quat<F>& b);
+
+    template<std::floating_point F>
+    inline quat<F> operator+(const quat<F>& a, const quat<F>& b);
 
     template<std::floating_point F>
     inline quat<F> operator*(const quat<F>& rot, F scalar);

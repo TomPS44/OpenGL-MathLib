@@ -1,5 +1,8 @@
 #include <iostream>
 #include <concepts>
+#include <iomanip>
+#include <cmath>
+#include <string>
 
 // #include "Math.hpp"
 #include "Vectors.hpp"
@@ -75,25 +78,47 @@ void logMat2(const mat2<F>& mat)
 }
 
 
+void printTest(const std::string& testName, bool success)
+{
+    std::cout << "[ ";
+
+    if (success) 
+    {
+        // Code ANSI pour le vert
+        std::cout << "\033[32mPASS\033[0m";
+    } 
+    else 
+    {
+        // Code ANSI pour le rouge
+        std::cout << "\033[31mFAIL\033[0m";
+    }
+
+    std::cout << " ] " << testName << std::endl;
+}
+
 int main() 
 {
-    // quatf rotation = quatf::identity();
-    // vec3f translation = (vec3f::up() + vec3f::left()) * 2.0f;
+    // Paramètres de la simulation
+    vec3f cameraPos(0, 0, 0);
+    vec3f targetStart(0, 0, 1);  // Regarde devant (Z)
+    vec3f targetEnd(1, 0, 0);    // Regarde à droite (X)
+    vec3f worldUp(0, 1, 0);
+    
+    // 1. Calcul des quaternions cibles
+    quatf qStart = quatf::lookAt(cameraPos, targetStart, worldUp);
+    quatf qEnd   = quatf::lookAt(cameraPos, targetEnd, worldUp);
+    
+    // 2. Interpolation à 25% du chemin
+    float t = 0.25f;
+    quatf qCurrent = quatf::slerp(qStart, qEnd, t);
+    
+    // 3. Validation mathématique
+    // À 25% entre 0° et 90°, on doit être à exactement 22.5° sur l'axe Y.
+    // Le W d'un quaternion est cos(angle/2), donc cos(11.25°)
+    float expectedW = std::cos(11.25f * (3.14159265f / 180.0f));
+    
+    printTest("Smooth Camera Slerp (25%)", nearlyEqual(qCurrent.w, expectedW));
 
-    // logQuat(0.5f * (quatf::getPureQuat(translation) * rotation));
-
-    dualQuatd dQuat = { quatd::fromEuler(15.0f, 30.0f, 45.0f), vec3d(0.333f, 0.5f, 1.0f) };
-    dQuatf fDQuat = dQuat.as<float>();
-
-    logDualQuat(dQuat);
-    logVec3(fDQuat.getTranslation());
-    std::cout << typeid(dQuat.real.w).name() << std::endl;
-    std::cout << typeid(fDQuat.real.w).name() << std::endl;
-
-    vec3f target = { 1.0f, 3.0f, 0.0f };
-    dualQuatf move = { quatf::fromEuler(0.0f, 0.0f, -90.0f), vec3f(0.0f, 2.0f, -3.0f) };
-
-    logVec3(move.transformPoint(target));
 
     return 0;
 }

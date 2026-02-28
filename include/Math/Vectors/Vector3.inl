@@ -319,17 +319,17 @@ namespace math
     template<Number N>
     inline N vec3<F>::dotProduct(const vec3<F>& other) const
     {
-        return static_cast<N>( (x * other.x) + (y * other.y) + (z * other.y) );
+        return static_cast<N>( (x * other.x) + (y * other.y) + (z * other.z) );
     }
 
     template<std::floating_point F>
     inline vec3<F> vec3<F>::crossProduct(const vec3<F>& other) const
     {
-        F x = y * other.z - z * other.y;
-        F y = -(x * other.z - z * other.x);
-        F z = x * other.y - y * other.x;
-
-        return vec3(x, y, z);
+        return vec3<F>(
+        this->y * other.z - this->z * other.y,
+        this->z * other.x - this->x * other.z,
+        this->x * other.y - this->y * other.x
+        );
     }
 
     #pragma endregion MemberMethods
@@ -368,14 +368,14 @@ namespace math
     template<Number N>
     inline N vec3<F>::dotProduct(const vec3<F>& a, const vec3<F>& b) 
     {
-        return static_cast<N>( (a.x * b.x) + (a.y * b.y) + (a.z * b.y) );
+        return static_cast<N>( (a.x * b.x) + (a.y * b.y) + (a.z * b.z) );
     }
 
     template<std::floating_point F>
     inline vec3<F> vec3<F>::crossProduct(const vec3<F>& a, const vec3<F>& b) 
     {
         F x = a.y * b.z - a.z * b.y;
-        F y = -(a.x * b.z - a.z * b.x);
+        F y = a.z * b.x - a.x * b.z;
         F z = a.x * b.y - a.y * b.x;
 
         return vec3(x, y, z);
@@ -387,13 +387,13 @@ namespace math
     inline vec3<F> vec3<F>::lerp(const vec3<F>& start, const vec3<F>& end, f t)
     {
         t = clamp01(t);
-        return vec3(start.x + (end.x - start.x) * t, start.y + (end.y - start.y) * t, start.y + (end.y - start.y) * t);
+        return vec3(start.x + (end.x - start.x) * t, start.y + (end.y - start.y) * t, start.z + (end.z - start.z) * t);
     }
     template<std::floating_point F>
     template<std::floating_point f>
     inline vec3<F> vec3<F>::lerpUnclamped(const vec3<F>& start, const vec3<F>& end, f t)
     {
-        return vec3(start.x + (end.x - start.x) * t, start.y + (end.y - start.y) * t, start.y + (end.y - start.y) * t);
+        return vec3(start.x + (end.x - start.x) * t, start.y + (end.y - start.y) * t, start.z + (end.z - start.z) * t);
     }
 
     #pragma endregion StaticMethods

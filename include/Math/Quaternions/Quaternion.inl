@@ -220,44 +220,112 @@ namespace math
     }
 
     template<std::floating_point F>
-    inline quat<F> quat<F>::lookAt(const vec3<F>& eye, const vec3<F>& target, const vec3<F>& up)
+    inline quat<F> quat<F>::lookAtFree(const vec3<F>& eye, const vec3<F>& target)
     {
-        // 1. Calculer la direction vers laquelle on veut regarder
+        F f0 = static_cast<F>(0.0);
+        F f1 = static_cast<F>(1.0);
+
         vec3<F> forward = (target - eye).getUnitVector();
 
-        // 2. Notre vecteur "avant" par défaut 
-        vec3<F> localForward = vec3<F>(0, 0, 1);
+        vec3<F> localForward = vec3<F>(f0, f0, f1);
 
-        // 3. Trouver le produit scalaire (cosinus de l'angle)
         F dot = vec3<F>::dotProduct(localForward, forward);
-
-        // Cas particuliers : si les vecteurs sont opposés
-        if (std::abs(dot + static_cast<F>(1.0)) < math::epsilon<F>()) 
+        
+        if (std::abs(dot + static_cast<F>(1.0)) < math::epsilon<F>())
         {
-            return quat<F>(0, up.x, up.y, up.z); // Rotation de 180° autour de l'axe Up
+            vec3<F> axis = vec3<F>::crossProduct(vec3<F>(f1, f0, f0), localForward);
+        
+            if (axis.lengthSquared() < math::epsilon<F>())
+            {
+                axis = vec3<F>::crossProduct(vec3<F>(f0, f1, f0), localForward);
+            }
+
+            axis = axis.getUnitVector();
+
+            return quat<F>(static_cast<F>(0.0), axis.x, axis.y, axis.z);
         }
-        // Si les vecteurs sont déjà alignés
-        if (std::abs(dot - static_cast<F>(1.0)) < math::epsilon<F>()) 
+
+        if (std::abs(dot - static_cast<F>(1.0)) < math::epsilon<F>())
         {
             return quat<F>::identity();
         }
 
-        // 4. Calculer l'axe de rotation (produit vectoriel)
         vec3<F> axis = vec3<F>::crossProduct(localForward, forward);
 
-        // 5. Formule directe pour le quaternion de rotation entre deux vecteurs
-        // q.w = sqrt( length(v1)^2 * length(v2)^2 ) + dot(v1, v2)
-        // q.xyz = cross(v1, v2)
-        F s = std::sqrt((static_cast<F>(1.0) + dot) * static_cast<F>(2.0));
+        F s = std::sqrt( (f1 + dot) * static_cast<F>(2.0) );
+
         F invS = static_cast<F>(1.0) / s;
 
-        return quat<F>(
-            s * static_cast<F>(0.5),
-            axis.x * invS,
-            axis.y * invS,
-            axis.z * invS
-        )
-        .normalized();
+
+        return quat<F>(s * static_cast<F>(0.5), axis.x * invS, axis.y * invS, axis.z * invS).normalized();
+    }
+
+    template<std::floating_point F>
+    inline quat<F> quat<F>::lookAt(const vec3<F>& eye, const vec3<F>& target, const vec3<F>& up)
+    {
+        F f0 = static_cast<F>(0.0);
+        F f1 = static_cast<F>(1.0);
+        F f2 = static_cast<F>(2.0);
+        F f025 = static_cast<F>(0.25);
+        
+        vec3<F> forward = (target - eye).getUnitVector();
+        vec3<F> right;
+
+        F dotUp = vec3<F>::dotProduct(up, forward);
+        if (std::abs(dotUp) > static_cast<F>(0.9999)) 
+        { 
+            vec3<F> temporaryUp = std::abs(forward.z) < 0.999f ? vec3<F>(f0, f0, f1) : vec3<F>(f1, f0, f0); 
+            right = vec3<F>::crossProduct(temporaryUp, forward).getUnitVector(); 
+        } 
+        else 
+        { 
+            right = vec3<F>::crossProduct(up, forward).getUnitVector(); 
+        }
+            
+        vec3<F> actualUp = vec3<F>::crossProduct(forward, right);  
+        
+        F m00 = right.x;     F m01 = right.y;     F m02 = right.z;
+        F m10 = actualUp.x;  F m11 = actualUp.y;  F m12 = actualUp.z;
+        F m20 = forward.x;   F m21 = forward.y;   F m22 = forward.z;
+            
+        F tr = m00 + m11 + m22;
+        F qw, qx, qy, qz;
+            
+
+        if (tr > 0.0f) 
+        {
+            F s = static_cast<F>(std::sqrt(tr + f1) * f2);
+            qw = f025 * s;
+            qx = (m12 - m21) / s;
+            qy = (m20 - m02) / s;
+            qz = (m01 - m10) / s;
+        } 
+        else if ((m00 > m11) && (m00 > m22)) 
+        {
+            F s = static_cast<F>(std::sqrt(f1 + m00 - m11 - m22) * f2);
+            qw = (m12 - m21) / s;
+            qx = f025 * s;
+            qy = (m01 + m10) / s;
+            qz = (m20 + m02) / s;
+        } 
+        else if (m11 > m22) 
+        {
+            F s = static_cast<F>(std::sqrt(f1 + m11 - m00 - m22) * f2);
+            qw = (m20 - m02) / s;
+            qx = (m01 + m10) / s;
+            qy = f025 * s;
+            qz = (m12 + m21) / s;
+        } 
+        else 
+        {
+            F s = static_cast<F>(std::sqrt(f1 + m22 - m00 - m11) * f2);
+            qw = (m01 - m10) / s;
+            qx = (m20 + m02) / s;
+            qy = (m12 + m21) / s;
+            qz = f025 * s;
+        }
+        
+        return quat<F>(qw, qx, qy, qz).normalized();
     }
 
     template<std::floating_point F>
@@ -320,14 +388,13 @@ namespace math
     {
         quat<F> q = rot.getUnitQuat();
 
-        vec3<F> qVec = { q.x, q.y, q.z };
+        vec3<F> u(q.x, q.y, q.z);
 
-        vec3<F> t = vec3<F>::crossProduct(qVec, point) * static_cast<F>(2.0);
+        vec3<F> t = u.crossProduct(point) * static_cast<F>(2.0);
 
-        vec3<F> result = point + (t * q.w) + vec3<F>::crossProduct(qVec, t);
-
-        return result;
+        return point + (t * q.w) + u.crossProduct(t);
     }
+
     template<std::floating_point F>
     inline vec3<F> quat<F>::rotatePointAroundPivot(const vec3<F>& point, const vec3<F> pivot, const quat<F>& rot)
     {
@@ -349,6 +416,53 @@ namespace math
     inline vec3<F> quat<F>::rotatePointAroundPivot(const vec3<F>& point, const vec3<F>& pivot) const
     {
         return quat<F>::rotatePointAroundPivot(point, pivot, *this);
+    }
+
+
+    template<std::floating_point F> inline quat<F> quat<F>::lerp(const quat<F>& start, const quat<F>& end, F t) 
+    { 
+        t = math::clamp01(t);
+        return quat<F>::lerpUnclamped(start, end, t);
+    }
+
+    template<std::floating_point F> inline quat<F> quat<F>::lerpUnclamped(const quat<F>& start, const quat<F>& end, F t) 
+    { 
+        F invT = static_cast<F>(1.0) - t; // 1 - t
+        return (start * invT + end * t).normalized(); 
+    }
+
+
+    template<std::floating_point F> inline quat<F> quat<F>::slerp(const quat<F>& start, const quat<F>& end, F t) 
+    { 
+        t = math::clamp01(t);
+        return quat<F>::slerpUnclamped(start, end, t);
+    }
+
+    template<std::floating_point F> inline quat<F> quat<F>::slerpUnclamped(const quat<F>& start, const quat<F>& end, F t) 
+    { 
+        quat<F>  s = start.getUnitQuat();
+        quat<F>  e = end.getUnitQuat();
+
+        F dot = quat<F>::dotProduct(s, e);
+
+        if (dot < static_cast<F>(0.0))
+        {
+            e = e * static_cast<F>(-1.0);
+            dot = -dot;
+        }
+
+        if (dot > static_cast<F>(0.9995))
+        {
+            return quat<F>::lerpUnclamped(s, e, t);
+        }
+
+        F ang = std::acos(dot);
+        F sinAng = std::sin(ang);
+
+        F wA = std::sin((static_cast<F>(1.0) - t) * ang) / sinAng;
+        F wB = std::sin(t * ang) / sinAng;
+
+        return (s * wA) + (e * wB);
     }
 
     
@@ -404,6 +518,17 @@ namespace math
             a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
             a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
             a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w
+        );
+    }
+
+    template<std::floating_point F>
+    inline quat<F> operator+(const quat<F>& a, const quat<F>& b)
+    {
+        return quat<F>(
+            a.w + b.w,
+            a.x + b.x,
+            a.y + b.y,
+            a.z + b.z
         );
     }
 

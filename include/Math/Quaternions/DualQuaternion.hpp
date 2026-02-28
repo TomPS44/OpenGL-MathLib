@@ -63,6 +63,9 @@ namespace math
     dualQuat<F> operator*(const dualQuat<F>& a, const dualQuat<F>& b);
 
     template<std::floating_point F>
+    dualQuat<F> operator+(const dualQuat<F>& a, const dualQuat<F>& b);
+
+    template<std::floating_point F>
     dualQuat<F> operator*(const dualQuat<F>& dQuat, F scalar);
 
     template<std::floating_point F>

@@ -18,9 +18,11 @@ namespace math
     template<std::floating_point F>
     inline mat4<F>::mat4()
     {
+        F f0 = static_cast<F>(0.0);
+
         for (int i = 0; i < 16; i++)
         {
-            indices[i] = static_cast<F>(0.0);
+            indices[i] = f0;
         }
     }
 

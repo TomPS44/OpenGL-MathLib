@@ -84,33 +84,33 @@ namespace math
 
         const F* valuePtr() const;
 
-        template<Number N>
+        template<Number N = F>
         N length() const;
-        template<Number N>
+        template<Number N = F>
         N lengthSquared() const;
 
-        template<Number N>
+        template<Number N = F>
         N dotProduct(const vec3& other) const;
         vec3<F> crossProduct(const vec3<F>& other) const;
 
-        template<Number N>
+        template<Number N = F>
         N distance(const vec3& other) const;
-        template<Number N>
+        template<Number N = F>
         N distanceSquared(const vec3& other) const;
 
-        template<Number N>
+        template<Number N = F>
         static N length(const vec3& vec);
-        template<Number N>
+        template<Number N = F>
         static N lengthSquared(const vec3& vec)  ;
 
-        template<Number N>
+        template<Number N = F>
         static N dotProduct(const vec3& vec1, const vec3& vec2);
 
         static vec3 crossProduct(const vec3& a, const vec3& b);
 
-        template<Number N>
+        template<Number N = F>
         static N distance(const vec3& vec1, const vec3& vec2);
-        template<Number N>
+        template<Number N = F>
         static N distanceSquared(const vec3& vec1, const vec3& vec2);
 
         vec3& normalized();
