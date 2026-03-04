@@ -1,10 +1,11 @@
 #pragma once
 
 #include <concepts>
+#include <type_traits>
 
 namespace math
 {
-    // The concept Number encapsulates all the types that are the same as 
+    // The concept Number allows all the types that are the same as 
     // int, float, double, long, long long, long double
     template<typename T>
     concept Number = 
@@ -13,9 +14,16 @@ namespace math
         std::is_same_v<T, double>      ||
         std::is_same_v<T, long>        ||
         std::is_same_v<T, long long>   ||
-        std::is_same_v<T, long double>;
+        std::is_same_v<T, long double> ;
 
-    // The concept Number encapsulates all the types that define the operators 
+    // The concept FloatingNumber allow all the types that are the same as
+    // float, double
+    template<typename T>
+    concept FloatingNumber = 
+        std::is_same_v<T, float>  ||
+        std::is_same_v<T, double> ;
+
+    // The concept IsComparable encapsulates all the types that define the operators 
     // < , > , == , !=
     template<typename T>
     concept IsComparable =

@@ -4,10 +4,7 @@
 
 namespace math
 {
-    template<std::floating_point f>
-    struct angle;
-
-    template<std::floating_point F>
+    template<FloatingNumber F>
     struct vec2
     {
     public:
@@ -46,29 +43,23 @@ namespace math
         static vec2 right();
 
 
-        template<std::floating_point f>
-        f X() const;
-        template<std::floating_point f>
-        f Y() const;
         // Returns a new Vec2 made of the X and Y values of the vector
-        template<std::floating_point f = F>
-        vec2<f> XY() const;
+        template<FloatingNumber f = F>
+        vec2<f> as() const;
+
         // Returns a new Vec2 made of the y and X values of the vector
-        template<std::floating_point f = F>
-        vec2<f> YX() const;
+        vec2 YX() const;
         // Returns a new Vec2 made of the X and X values of the vector
-        template<std::floating_point f = F>
-        vec2<f> XX() const;
+        vec2 XX() const;
         // Returns a new Vec2 made of the Y and Y values of the vector
-        template<std::floating_point f = F>
-        vec2<f> YY() const;
+        vec2 YY() const;
+
 
         // Returns the same vector, but with its magnitude being 1
         vec2& normalized();
 
         // Returns a new vector, that is the same as the original one, but normalized
-        template<std::floating_point f = F>
-        vec2<f> getUnitVector() const;
+        vec2 getUnitVector() const;
         
 
         // Returns the magnitude of the vector
@@ -92,7 +83,7 @@ namespace math
         static N length(const vec2& vec);
         template<Number N>   
         static N lengthSquared(const vec2& vec);
-        template<Number N>
+        template<Number N = F>
         static N dotProduct(const vec2& vec1, const vec2& vec2);
         template<Number N>
         static N distance(const vec2& vec1, const vec2& vec2);
@@ -113,20 +104,20 @@ namespace math
         
     };
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline vec2<F> operator+(const vec2<F>& a, const vec2<F>& b);
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline vec2<F> operator-(const vec2<F>& a, const vec2<F>& b);
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline vec2<F> operator*(const vec2<F>& vec, F scalar);
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline vec2<F> operator*(F scalar, const vec2<F>& vec);
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline vec2<F> operator/(const vec2<F>& vec, F scalar);
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline bool operator==(const vec2<F>& a, const vec2<F>& b);
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline bool operator!=(const vec2<F>& a, const vec2<F>& b);
 }
 

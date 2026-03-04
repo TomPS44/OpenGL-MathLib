@@ -13,3 +13,5 @@ include_directories(include)
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
 message(STATUS "Compilation réussie ! Le fichier ${PROJECT_NAME}.exe a été créé :)")
+
+

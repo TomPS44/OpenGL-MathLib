@@ -1,38 +1,37 @@
 #include <concepts>
 #include <cmath>
-#include "DualQuaternion.hpp"
 
+#include "Math\MathInternal.hpp"
 
 namespace math
 {
 
     #pragma region Constructors
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline dualQuat<F>::dualQuat()
     {
-        F f0 = static_cast<F>(0.0);
         quat<F> quat0;
 
         real = quat0;
         dual = quat0;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline dualQuat<F>::dualQuat(const quat<F>& rotation, const vec3<F>& translation)
     {
         real = rotation;
         dual = static_cast<F>(0.5) * (quat<F>::getPureQuat(translation) * rotation);
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline dualQuat<F>::dualQuat(const quat<F>& rotation, const quat<F>& translation)
     {
         real = rotation;
         dual = translation;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline dualQuat<F>::dualQuat(const quat<F>& rotation)
     {
         F f0 = static_cast<F>(0.0);
@@ -41,20 +40,21 @@ namespace math
         dual = quat<F>(f0, f0, f0, f0);
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline dualQuat<F>::dualQuat(const vec3<F>& translation)
     {
         F f0 = static_cast<F>(0.0);
+        F f05 = static_cast<F>(0.5);
 
         real = quat<F>::identity();
-        dual = quat<F>(static_cast<F>(0.0), translation.x, translation.y, translation.z);
+        dual = quat<F>(static_cast<F>(0.0), translation.x * f05, translation.y * f05, translation.z * f05);
     }
 
     #pragma endregion
 
     #pragma region StaticConstructors
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline dualQuat<F> dualQuat<F>::identity()
     {
         F f0 = static_cast<F>(0.0);
@@ -71,7 +71,7 @@ namespace math
     
     #pragma region Normalizing
 
-    template <std::floating_point F>
+    template <FloatingNumber F>
     inline dualQuat<F>& dualQuat<F>::normalized()
     {
         F l = real.template length<F>();
@@ -87,32 +87,15 @@ namespace math
         return *this;
     }
 
-    template <std::floating_point F>
-    template <std::floating_point f>
-    inline dualQuat<f> dualQuat<F>::getUnitDualQuat() const
+    template <FloatingNumber F>
+    inline dualQuat<F> dualQuat<F>::getUnitDualQuat() const
     {
-        dualQuat<F> dQuat = *this;
-        dQuat = dQuat.normalized();
+        dualQuat<F> copy = *this;
 
-        dualQuat<f> res;
-
-        // res.real.w = static_cast<F>(dQuat.real.w);
-        // res.real.x = static_cast<F>(dQuat.real.x);
-        // res.real.y = static_cast<F>(dQuat.real.y);
-        // res.real.z = static_cast<F>(dQuat.real.z);
-
-        // res.dual.w = static_cast<F>(dQuat.dual.w);
-        // res.dual.x = static_cast<F>(dQuat.dual.x);
-        // res.dual.y = static_cast<F>(dQuat.dual.y);
-        // res.dual.z = static_cast<F>(dQuat.dual.z);
-
-        res.real = dQuat.real.template WXYZ<f>();
-        res.dual = dQuat.dual.template WXYZ<f>();
-
-        return res;
+        return copy.normalized();
     }
 
-    template <std::floating_point F>
+    template <FloatingNumber F>
     inline dualQuat<F>& dualQuat<F>::conjugated()
     {
         real = real * static_cast<F>(-1.0);
@@ -121,121 +104,101 @@ namespace math
         return *this;
     }
 
-    template <std::floating_point F>
-    template <std::floating_point f>
-    inline dualQuat<f> dualQuat<F>::getConjugatedDualQuat() const
+    template <FloatingNumber F>
+    inline dualQuat<F> dualQuat<F>::getConjugatedDualQuat() const
     {
-        dualQuat<F> dQuat = *this;
-        dQuat = dQuat.conjugated();
+        dualQuat<F> copy = *this;
 
-        dualQuat<f> res;
-
-        // res.real.w = static_cast<F>(dQuat.real.w);
-        // res.real.x = static_cast<F>(dQuat.real.x);
-        // res.real.y = static_cast<F>(dQuat.real.y);
-        // res.real.z = static_cast<F>(dQuat.real.z);
-
-        // res.dual.w = static_cast<F>(dQuat.dual.w);
-        // res.dual.x = static_cast<F>(dQuat.dual.x);
-        // res.dual.y = static_cast<F>(dQuat.dual.y);
-        // res.dual.z = static_cast<F>(dQuat.dual.z);
-
-        res.real = dQuat.real.template WXYZ<f>();
-        res.dual = dQuat.dual.template WXYZ<f>();
-
-        return res;
+        return copy.conjugated();
     }
 
-    // template <std::floating_point F>
-    // inline dualQuat<F>& dualQuat<F>::inversed()
-    // {
-    //     real *= static_cast<F>(-1.0);
-    //     dual *= static_cast<F>(-1.0);
+    template <FloatingNumber F>
+    inline dualQuat<F>& dualQuat<F>::inversed()
+    {
+        F lSqr2 = real.lengthSquared();
 
-    //     return *this;
-    // }
+        if (lSqr2 > math::epsilon<F>())
+        {
+            F lSqr4 = lSqr2 * lSqr2;
 
-    // template <std::floating_point F>
-    // template <std::floating_point f>
-    // inline dualQuat<f> dualQuat<F>::getInversedDualQuat() const
-    // {
-    //     dualQuat<F> dQuat = *this;
-    //     dQuat = dQuat.conjugated();
+            F invl2 = static_cast<F>(1.0) / lSqr2;
+            F invl4 = invl2 * invl2;
 
-    //     dualQuat<f> res;
+            quat<F> conjReal = real.getConjugatedQuat();
+            quat<F> invConjReal = conjReal * static_cast<F>(-1.0);
 
-    //     // res.real.w = static_cast<F>(dQuat.real.w);
-    //     // res.real.x = static_cast<F>(dQuat.real.x);
-    //     // res.real.y = static_cast<F>(dQuat.real.y);
-    //     // res.real.z = static_cast<F>(dQuat.real.z);
+            quat<F> invReal = conjReal * invl2;
+            quat<F> invDual = (invConjReal * dual * conjReal) * invl4;
 
-    //     // res.dual.w = static_cast<F>(dQuat.dual.w);
-    //     // res.dual.x = static_cast<F>(dQuat.dual.x);
-    //     // res.dual.y = static_cast<F>(dQuat.dual.y);
-    //     // res.dual.z = static_cast<F>(dQuat.dual.z);
+            this->real = invReal;
+            this->dual = invDual;
+        }
 
-    //     res.real = dQuat.real.template WXYZ<f>();
-    //     res.dual = dQuat.dual.template WXYZ<f>();
+        return *this;
+    }
 
-    //     return res;
-    // }
+    template <FloatingNumber F>
+    inline dualQuat<F> dualQuat<F>::getInversedDualQuat() const
+    {
+        dualQuat<F> copy = *this;
+
+        return copy.inversed();
+    }
 
     #pragma endregion
 
     #pragma region Casting
 
-    template<std::floating_point F>
-    template<std::floating_point f>
+    template<FloatingNumber F>
+    template<FloatingNumber f>
     inline dualQuat<f> dualQuat<F>::as() const
     {
-        return dualQuat<f>(real.template WXYZ<f>(), dual.template WXYZ<f>());
+        return dualQuat<f>(real.template as<f>(), dual.template as<f>());
     }
 
     #pragma endregion
 
     #pragma region MemberMethods
 
-    template < std::floating_point F>
-    template < std::floating_point f>
-    inline quat < f> dualQuat < F> ::getRotation() const
+    template<FloatingNumber F>
+    inline quat<F> dualQuat<F>::getRotation() const
     {
-        return real.template WXYZ<f>();
+        return real;
     }
 
-    template<std::floating_point F>
-    template<std::floating_point f>
-    inline vec3<f> dualQuat<F>::getTranslation() const
+    template<FloatingNumber F>
+    inline vec3<F> dualQuat<F>::getTranslation() const
     {
-        return ( static_cast<F>(2.0) * (dual * real.getConjugatedQuat()) ).template XYZ<f>();
+
+        return  ( static_cast<F>(2.0) * (dual * real.getConjugatedQuat()) ).template XYZ();
     }
 
     
 
-    template<std::floating_point F>
-    template<std::floating_point f>
-    inline mat4<f> dualQuat<F>::toMat4() const
+    template<FloatingNumber F>
+    inline mat4<F> dualQuat<F>::toMat4() const
     {
-        F xx = static_cast<f>(real.x * real.x);
-        F yy = static_cast<f>(real.y * real.y);
-        F zz = static_cast<f>(real.z * real.z);
-        F xy = static_cast<f>(real.x * real.y);
-        F wz = static_cast<f>(real.w * real.z);
-        F wy = static_cast<f>(real.w * real.y);
-        F wx = static_cast<f>(real.w * real.x);
-        F xz = static_cast<f>(real.x * real.z);
-        F yz = static_cast<f>(real.y * real.z);
+        F xx = real.x * real.x;
+        F yy = real.y * real.y;
+        F zz = real.z * real.z;
+        F xy = real.x * real.y;
+        F wz = real.w * real.z;
+        F wy = real.w * real.y;
+        F wx = real.w * real.x;
+        F xz = real.x * real.z;
+        F yz = real.y * real.z;
 
         F f0 = static_cast<F>(0.0);
 
-        vec3<f> t = this->getTranslation();
+        vec3<F> t = this->getTranslation();
 
-        return mat4<f>(1 - 2 * (yy + zz), 2 * (xy - wz)    , 2 * (xz + wy)    , t.x,
+        return mat4<F>(1 - 2 * (yy + zz), 2 * (xy - wz)    , 2 * (xz + wy)    , t.x,
                        2 * (xy + wz)    , 1 - 2 * (xx + zz), 2 * (yz - wx)    , t.y,
                        2 * (xz - wy)    , 2 * (yz + wx)    , 1 - 2 * (xx + yy), t.z,
                        f0               , f0               , f0               , static_cast<F>(1.0));
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline vec3<F> dualQuat<F>::transformPoint(const vec3<F>& point) const
     {
         vec3<F> rotatedPoint = real.rotatePoint(point);
@@ -247,7 +210,7 @@ namespace math
 
     #pragma region StaticMethods
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline dualQuat<F> dualQuat<F>::lerp(const dualQuat<F>& start, const dualQuat<F>& end, F t) 
     {
         t = math::clamp01(t);
@@ -272,7 +235,7 @@ namespace math
         #endif
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline dualQuat<F> dualQuat<F>::lerpUnclamped(const dualQuat<F>& start, const dualQuat<F>& end, F t) 
     {
         dualQuat<F> trueEnd = end;
@@ -287,7 +250,7 @@ namespace math
         return interp.normalized();
     }
     
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline vec3<F> dualQuat<F>::transformPoint(const vec3<F>& point, const dualQuat<F>& dQuat) 
     {
         vec3<F> rotatedPoint = dQuat.real.rotatePoint(point);
@@ -297,7 +260,7 @@ namespace math
     #pragma endregion
 
 
-    template <std::floating_point F>
+    template <FloatingNumber F>
     dualQuat<F> operator*(const dualQuat<F>& a, const dualQuat<F>& b)
     {
         dualQuat<F> res;
@@ -308,7 +271,7 @@ namespace math
         return res;
     }
 
-    template <std::floating_point F>
+    template <FloatingNumber F>
     dualQuat<F> operator+(const dualQuat<F>& a, const dualQuat<F>& b)
     {
         dualQuat<F> res;
@@ -319,7 +282,7 @@ namespace math
         return res;
     }
 
-    template <std::floating_point F>
+    template <FloatingNumber F>
     dualQuat<F> operator*(const dualQuat<F>& dQuat, F scalar)
     {
         dualQuat<F> res = dQuat;
@@ -330,7 +293,7 @@ namespace math
         return res;
     }
 
-    template <std::floating_point F>
+    template <FloatingNumber F>
     dualQuat<F> operator*(F scalar, const dualQuat<F>& dQuat)
     {
         dualQuat<F> res = dQuat;

@@ -1,18 +1,21 @@
 #pragma once
 
+#include "Math\Concepts.hpp"
+
+
 namespace math
 {
-    template<std::floating_point F>
+    template<FloatingNumber F>
     struct vec3;
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     struct mat4;
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     struct mat3;
 
-    template<std::floating_point F>
-    struct alignas(16) quat  
+    template<FloatingNumber F>
+    struct alignas(sizeof(F) * 4) quat  
     {
     public:
         union 
@@ -28,30 +31,26 @@ namespace math
 
         static quat<F> identity();
         static quat<F> getPureQuat(const vec3<F>& vec);
+
         
-        template<std::floating_point type = F>
-        vec3<type> XYZ() const;
-        template<std::floating_point type = F>
-        vec3<type> ZYX() const;
-        template<std::floating_point type = F>
-        quat<type> WXYZ() const;
+        vec3<F> XYZ() const;
+        vec3<F> ZYX() const;
+
+
+        template<FloatingNumber type>
+        quat<type> as() const;
+
 
         F* valuePtr() const;
 
         quat& normalized();
-
-        template<std::floating_point type = F>
-        quat<type> getUnitQuat() const;
+        quat getUnitQuat() const;
 
         quat& conjugated();
-
-        template<std::floating_point type = F>
-        quat<type> getConjugatedQuat() const;
+        quat getConjugatedQuat() const;
 
         quat& inversed();
-
-        template<std::floating_point type = F>
-        quat<type> getInversedQuat() const;
+        quat getInversedQuat() const;
 
         template<Number N = F>
         N length() const;
@@ -63,6 +62,8 @@ namespace math
         template<Number N = F>
         static N lengthSquared(const quat& quat);
 
+        template<Number N = F>
+        N dotProduct(const quat<F>& other) const;
         template<Number N = F>
         static N dotProduct(const quat<F>& a, const quat<F>& b);
 
@@ -88,23 +89,27 @@ namespace math
 
         vec3<F> toEuler() const;
 
-        template<std::floating_point f = F>
-        mat3<f> toMat3() const;
-        template<std::floating_point f = F>
-        mat4<f> toMat4() const;
+        mat3<F> toMat3() const;
+        mat4<F> toMat4() const;
     };
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline quat<F> operator*(const quat<F>& a, const quat<F>& b);
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline quat<F> operator+(const quat<F>& a, const quat<F>& b);
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
+    inline quat<F> operator-(const quat<F>& a, const quat<F>& b);
+
+    template<FloatingNumber F>
     inline quat<F> operator*(const quat<F>& rot, F scalar);
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline quat<F> operator*(F scalar, const quat<F>& rot);
+
+    template<FloatingNumber F>
+    inline quat<F> operator/(const quat<F>& rot, F scalar);
 }
 
 #include "Math\Quaternions\Quaternion.inl"

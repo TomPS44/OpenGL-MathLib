@@ -1,12 +1,14 @@
 #include <cmath>
 #include <concepts>
 
+#include "Math\MathInternal.hpp"
+
 namespace math
 {
     
     #pragma region Constructors
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat2<F>::mat2(F m00, F m01, 
                          F m10, F m11)
     {
@@ -15,7 +17,7 @@ namespace math
         
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat2<F>::mat2()
     {
         F f0 = static_cast<F>(0.0);
@@ -31,7 +33,7 @@ namespace math
     #pragma region StaticConstructors
     
     
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat2<F> mat2<F>::diagonal(F diagonal)
     {
         mat2<F> baseMat;
@@ -42,7 +44,7 @@ namespace math
         return baseMat;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat2<F> mat2<F>::identity()
     {
         mat2<F> baseMat;
@@ -59,8 +61,8 @@ namespace math
     
     #pragma region Casting
     
-    template<std::floating_point F>
-    template<std::floating_point f>
+    template<FloatingNumber F>
+    template<FloatingNumber f>
     inline mat2<f> mat2<F>::as() const
     {
         mat2<f> res;
@@ -78,14 +80,14 @@ namespace math
     
     #pragma region MemberMethods
     
-    template<std::floating_point F>
+    template<FloatingNumber F>
     template<Number N>
     inline N mat2<F>::determinant() const
     {
         return columns[0][0] * columns[1][1] - columns[0][1] * columns[1][0];
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat2<F>& mat2<F>::inverted()
     {
         F det = this->determinant<F>();
@@ -108,7 +110,7 @@ namespace math
         return *this;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat2<F>& mat2<F>::transposed()
     {
         F m01 = columns[1][0];
@@ -120,47 +122,29 @@ namespace math
         return *this;
     }
 
-    template<std::floating_point F>
-    template<std::floating_point f>
-    inline mat2<f> mat2<F>::getInvertedMat() const
+    template<FloatingNumber F>
+    inline mat2<F> mat2<F>::getInvertedMat() const
     {
-        mat2<F> mat = *this;
-        mat = mat.inverted();
+        mat2<F> res = *this;
 
-        mat2<f> res;
-
-        res.indices[0] = static_cast<f>(mat.indices[0]);
-        res.indices[1] = static_cast<f>(mat.indices[1]);
-        res.indices[2] = static_cast<f>(mat.indices[2]);
-        res.indices[3] = static_cast<f>(mat.indices[3]);
-
-        return res;
+        return res.inverted();
     }
 
-    template<std::floating_point F>
-    template<std::floating_point f>
-    inline mat2<f> mat2<F>::getTransposedMat() const
+    template<FloatingNumber F>
+    inline mat2<F> mat2<F>::getTransposedMat() const
     {
-        mat2<F> mat = *this;
-        mat = mat.transposed();
+        mat2<F> res = *this;
 
-        mat2<f> res;
-
-        res.indices[0] = static_cast<f>(mat.indices[0]);
-        res.indices[1] = static_cast<f>(mat.indices[1]);
-        res.indices[2] = static_cast<f>(mat.indices[2]);
-        res.indices[3] = static_cast<f>(mat.indices[3]);
-
-        return res;
+        return res.transposed();
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline F& mat2<F>::at(int row, int col)
     {
         return columns[col][row];
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline F mat2<F>::at(int row, int col) const
     {
         return columns[col][row];
@@ -170,7 +154,7 @@ namespace math
     
     #pragma region StaticMethods
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat2<F> mat2<F>::rotateZ(F zAngDeg)
     {
         F cosAng = static_cast<F>(std::cos(zAngDeg * math::degToRad<F>()));
@@ -184,7 +168,7 @@ namespace math
 
     #pragma region ArithmeticOperators
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat2<F> operator+(const mat2<F>& a, const mat2<F>& b) 
     {
         mat2<F> res;
@@ -197,7 +181,7 @@ namespace math
         return res;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat2<F> operator-(const mat2<F>& a, const mat2<F>& b) 
     {
         mat2<F> res;
@@ -210,7 +194,7 @@ namespace math
         return res;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat2<F> operator*(const mat2<F>& a, const mat2<F>& b) 
     {
         mat2<F> res;
@@ -224,7 +208,7 @@ namespace math
         return res;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat2<F> operator*(const mat2<F>& mat, F scalar) 
     {
         mat2<F> res;
@@ -237,7 +221,7 @@ namespace math
         return res;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat2<F> operator*(F scalar, const mat2<F>& mat) 
     {
         mat2<F> res;
@@ -250,7 +234,7 @@ namespace math
         return res;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline vec2<F> operator*(const mat2<F>& mat, const vec2<F>& vec) 
     {
         vec2<F> res;
@@ -261,7 +245,7 @@ namespace math
         return res;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat2<F> operator/(const mat2<F>& mat, F scalar) 
     {
         if (scalar == static_cast<F>(0.0)) return mat;

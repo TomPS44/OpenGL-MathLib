@@ -4,11 +4,11 @@
 
 namespace math
 {
-    template<std::floating_point F>
+    template<FloatingNumber F>
     struct vec2;
 
     // A struct used to represent a Vector3, with x, y and z components
-    template<std::floating_point F>
+    template<FloatingNumber F>
     struct vec3
     {
     public:
@@ -44,42 +44,23 @@ namespace math
         static vec3 backward();
 
 
-        template<std::floating_point type = F>
-        type X() const;
-        template<std::floating_point type = F>
-        type Y() const;
-        template<std::floating_point type = F>
-        type Z() const;
+        template<FloatingNumber type>
+        vec3<type> as() const;
 
-        template<std::floating_point type = F>
-        vec2<type> XX() const; 
-        template<std::floating_point type = F>
-        vec2<type> YY() const;
-        template<std::floating_point type = F>
-        vec2<type> ZZ() const;
-        template<std::floating_point type = F>
-        vec2<type> XY() const;
-        template<std::floating_point type = F>
-        vec2<type> XZ() const;
-        template<std::floating_point type = F>
-        vec2<type> YX() const;
-        template<std::floating_point type = F>
-        vec2<type> YZ() const;
-        template<std::floating_point type = F>
-        vec2<type> ZX() const;
-        template<std::floating_point type = F>
-        vec2<type> ZY() const;
+        vec2<F> XX() const; 
+        vec2<F> YY() const;
+        vec2<F> ZZ() const;
+        vec2<F> XY() const;
+        vec2<F> XZ() const;
+        vec2<F> YX() const;
+        vec2<F> YZ() const;
+        vec2<F> ZX() const;
+        vec2<F> ZY() const;
 
-        template<std::floating_point type = F>
-        vec3<type> XXX() const;
-        template<std::floating_point type = F>
-        vec3<type> YYY() const;
-        template<std::floating_point type = F>
-        vec3<type> ZZZ() const;
-        template<std::floating_point type = F>
-        vec3<type> XYZ() const;
-        template<std::floating_point type = F>
-        vec3<type> ZYX() const;
+        vec3 XXX() const;
+        vec3 YYY() const;
+        vec3 ZZZ() const;
+        vec3 ZYX() const;
 
 
         const F* valuePtr() const;
@@ -114,13 +95,11 @@ namespace math
         static N distanceSquared(const vec3& vec1, const vec3& vec2);
 
         vec3& normalized();
+        vec3 getUnitVector() const;
 
-        template<std::floating_point type = F>
-        vec3<type> getUnitVector() const;
-
-        template<std::floating_point f>
+        template<FloatingNumber f>
         static vec3 lerp(const vec3& start, const vec3& end, f t);
-        template<std::floating_point f>
+        template<FloatingNumber f>
         static vec3 lerpUnclamped(const vec3& start, const vec3& end, f t);
 
 
@@ -130,20 +109,20 @@ namespace math
         vec3& operator/=(F scalar);
     };
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline vec3<F> operator+(const vec3<F>& a, const vec3<F>& b);
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline vec3<F> operator-(const vec3<F>& a, const vec3<F>& b);
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline vec3<F> operator*(const vec3<F>& vec, F scalar);
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline vec3<F> operator*(F scalar, const vec3<F>& vec);
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline vec3<F> operator/(const vec3<F>& vec, F scalar);
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline bool operator==(const vec3<F>& a, const vec3<F>& b);
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline bool operator!=(const vec3<F>& a, const vec3<F>& b);
 }
 

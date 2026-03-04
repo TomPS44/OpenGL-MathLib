@@ -1,13 +1,17 @@
 #pragma once
 
 #include <concepts>
+#include "Math\Concepts.hpp"
 
 namespace math
 {
-    template<std::floating_point F>
+    template<FloatingNumber F>
     struct quat;
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
+    struct vec3;
+
+    template<FloatingNumber F>
     struct dualQuat
     {
     public:
@@ -23,34 +27,25 @@ namespace math
         
         static dualQuat<F> identity();
 
-        template<std::floating_point type>
+        template<FloatingNumber type>
         dualQuat<type> as() const;
 
-        template<std::floating_point type = F>
-        quat<type> getRotation() const;
+        quat<F> getRotation() const;
 
-        template<std::floating_point type = F>
-        vec3<type> getTranslation() const;
+        vec3<F> getTranslation() const;
 
 
         dualQuat& normalized();
-
-        template<std::floating_point type = F>
-        dualQuat<type> getUnitDualQuat() const;
+        dualQuat getUnitDualQuat() const;
 
         dualQuat& conjugated();
+        dualQuat getConjugatedDualQuat() const;
 
-        template<std::floating_point type = F>
-        dualQuat<type> getConjugatedDualQuat() const;
-
-        // dualQuat& inversed();
-
-        // template<std::floating_point type = F>
-        // dualQuat<type> getInversedDualQuat() const;
+        dualQuat& inversed();
+        dualQuat getInversedDualQuat() const;
 
 
-        template<std::floating_point type = F>
-        mat4<type> toMat4() const;
+        mat4<F> toMat4() const;
 
         static dualQuat<F> lerp(const dualQuat<F>& start, const dualQuat<F>& end, F t);
         static dualQuat<F> lerpUnclamped(const dualQuat<F>& start, const dualQuat<F>& end, F t);
@@ -59,16 +54,16 @@ namespace math
         static vec3<F> transformPoint(const vec3<F>& point, const dualQuat<F>& dQuat);
     };
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     dualQuat<F> operator*(const dualQuat<F>& a, const dualQuat<F>& b);
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     dualQuat<F> operator+(const dualQuat<F>& a, const dualQuat<F>& b);
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     dualQuat<F> operator*(const dualQuat<F>& dQuat, F scalar);
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     dualQuat<F> operator*(F scalar, const dualQuat<F>& dQuat);
 }
 

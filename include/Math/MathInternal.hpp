@@ -26,7 +26,7 @@ namespace math
         return result;
     }
     template<IsComparable T, IsComparable... Args>
-    T mMin(T first, Args... args) 
+    T min(T first, Args... args) 
     {
         T result = first;
         ((result = min(result, args)), ...); 

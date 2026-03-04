@@ -1,12 +1,16 @@
 #include <cmath>
 #include <concepts>
 
+#include "Math\MathInternal.hpp"
+
+#include <iostream>
+
 namespace math
 {
     
     #pragma region Constructors
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat3<F>::mat3(F m00, F m01, F m02, 
                          F m10, F m11, F m12,
                          F m20, F m21, F m22)
@@ -16,7 +20,7 @@ namespace math
         columns[2][0] = m02; columns[2][1] = m12; columns[2][2] = m22;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat3<F>::mat3()
     {
         F f0 = static_cast<F>(0.0);
@@ -32,12 +36,26 @@ namespace math
         indices[8] = f0;
     }
 
+    template<FloatingNumber F>
+    inline mat3<F>::mat3(F scalar)
+    {
+        indices[0] = scalar;
+        indices[1] = scalar;
+        indices[2] = scalar;
+        indices[3] = scalar;
+        indices[4] = scalar;
+        indices[5] = scalar;
+        indices[6] = scalar;
+        indices[7] = scalar;
+        indices[8] = scalar;
+    }
+
     #pragma endregion Constructors
     
     #pragma region StaticConstructors
     
     
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat3<F> mat3<F>::diagonal(F diagonal)
     {
         mat3<F> baseMat;
@@ -49,7 +67,7 @@ namespace math
         return baseMat;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat3<F> mat3<F>::identity()
     {
         mat3<F> baseMat;
@@ -67,9 +85,9 @@ namespace math
     
     #pragma region Casting
     
-    template<std::floating_point F>
-    template<std::floating_point f>
-    inline mat3<f> mat3<F>::toMat() const
+    template<FloatingNumber F>
+    template<FloatingNumber f>
+    inline mat3<f> mat3<F>::as() const
     {
         mat3<f> res;
 
@@ -90,7 +108,7 @@ namespace math
     
     #pragma region MemberMethods
     
-    template<std::floating_point F>
+    template<FloatingNumber F>
     template<Number N>
     inline N mat3<F>::determinant() const
     {
@@ -99,24 +117,20 @@ namespace math
                columns[2][0] * (columns[0][1] * columns[1][2] - columns[1][1] * columns[0][2]);
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat3<F>& mat3<F>::inverted()
     {
         F det = this->determinant<F>();
     
         if (std::abs(det) > math::epsilon<F>()) 
         { 
-            #if 0
-            *this = this->getAdjugateMat<F>() * (static_cast<F>(1.0) / det);
-            #else
-            *this = ( this->getComatrix().getTransposedMat() ) * ( static_cast<F>(1.0) / det );
-            #endif
+            *this = this->getAdjugateMat() * (static_cast<F>(1.0) / det);  
         }
 
         return *this;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat3<F>& mat3<F>::transposed()
     {
         F m01 = columns[1][0];
@@ -136,86 +150,26 @@ namespace math
         return *this;
     }
 
-    template<std::floating_point F>
-    template<std::floating_point f>
-    inline mat3<f> mat3<F>::getInvertedMat() const
+    template<FloatingNumber F>
+    inline mat3<F> mat3<F>::getInvertedMat() const
     {
-        mat3<F> mat = *this;
-        mat = mat.inverted();
+        mat3<F> res = *this;
 
-        mat3<f> res;
-
-        res.indices[0] = static_cast<f>(mat.indices[0]);
-        res.indices[1] = static_cast<f>(mat.indices[1]);
-        res.indices[2] = static_cast<f>(mat.indices[2]);
-        res.indices[3] = static_cast<f>(mat.indices[3]);
-        res.indices[4] = static_cast<f>(mat.indices[4]);
-        res.indices[5] = static_cast<f>(mat.indices[5]);
-        res.indices[6] = static_cast<f>(mat.indices[6]);
-        res.indices[7] = static_cast<f>(mat.indices[7]);
-        res.indices[8] = static_cast<f>(mat.indices[8]);
-
-        return res;
+        return res.inverted();
     }
 
-    template<std::floating_point F>
-    template<std::floating_point f>
-    inline mat3<f> mat3<F>::getTransposedMat() const
+    template<FloatingNumber F>
+    inline mat3<F> mat3<F>::getTransposedMat() const
     {
-        mat3<F> mat = *this;
-        mat = mat.transposed();
+        mat3<F> res = *this;
 
-        mat3<f> res;
-
-        res.indices[0] = static_cast<f>(mat.indices[0]);
-        res.indices[1] = static_cast<f>(mat.indices[1]);
-        res.indices[2] = static_cast<f>(mat.indices[2]);
-        res.indices[3] = static_cast<f>(mat.indices[3]);
-        res.indices[4] = static_cast<f>(mat.indices[4]);
-        res.indices[5] = static_cast<f>(mat.indices[5]);
-        res.indices[6] = static_cast<f>(mat.indices[6]);
-        res.indices[7] = static_cast<f>(mat.indices[7]);
-        res.indices[8] = static_cast<f>(mat.indices[8]);
-
-        return res;
+        return res.transposed();
     }
 
-    template<std::floating_point F>
-    template<std::floating_point f>
-    inline mat3<f> mat3<F>::getComatrix() const
+    template<FloatingNumber F>
+    inline mat3<F> mat3<F>::getComatrix() const
     {
-        #if 0
-        
-        F m00 = + ( columns[1][1] * columns[2][2] - columns[2][1] * columns[1][2] );
-        F m01 = - ( columns[1][0] * columns[2][2] - columns[2][0] * columns[1][2] );
-        F m02 = + ( columns[1][0] * columns[2][1] - columns[2][0] * columns[1][1] );
-
-        F m10 = - ( columns[0][1] * columns[2][2] - columns[2][1] * columns[0][2] );
-        F m11 = + ( columns[0][0] * columns[1][1] - columns[2][0] * columns[0][2] );
-        F m12 = - ( columns[0][0] * columns[2][1] - columns[2][0] * columns[0][1] );
-
-        F m20 = + ( columns[0][1] * columns[1][2] - columns[1][1] * columns[0][2] );
-        F m21 = - ( columns[0][0] * columns[1][2] - columns[1][0] * columns[0][2] );
-        F m22 = + ( columns[0][0] * columns[1][1] - columns[1][0] * columns[0][1] );
-
-
-        mat3<f> res;
-
-        res.columns[0][0] = static_cast<f>(m00);
-        res.columns[0][1] = static_cast<f>(m01);
-        res.columns[0][2] = static_cast<f>(m02);
-        res.columns[1][0] = static_cast<f>(m10);
-        res.columns[1][1] = static_cast<f>(m11);
-        res.columns[1][2] = static_cast<f>(m12);
-        res.columns[2][0] = static_cast<f>(m20);
-        res.columns[2][1] = static_cast<f>(m21);
-        res.columns[2][2] = static_cast<f>(m22);
-
-        return res;
-        
-        #else
-
-        mat3<f> res;
+        mat3<F> res;
 
         res.columns[0][0] =  (columns[1][1] * columns[2][2] - columns[1][2] * columns[2][1]);
         res.columns[1][0] = -(columns[0][1] * columns[2][2] - columns[0][2] * columns[2][1]);
@@ -230,15 +184,12 @@ namespace math
         res.columns[2][2] =  (columns[0][0] * columns[1][1] - columns[0][1] * columns[1][0]);
 
         return res;
-
-        #endif
     }
 
-    template<std::floating_point F>
-    template<std::floating_point f>
-    inline mat3<f> mat3<F>::getAdjugateMat() const 
+    template<FloatingNumber F>
+    inline mat3<F> mat3<F>::getAdjugateMat() const 
     {
-        mat3<f> res;
+        mat3<F> res;
 
         res.columns[0][0] =  (columns[1][1] * columns[2][2] - columns[1][2] * columns[2][1]);
         res.columns[0][1] = -(columns[0][1] * columns[2][2] - columns[0][2] * columns[2][1]);
@@ -255,13 +206,13 @@ namespace math
         return res;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline F& mat3<F>::at(int row, int col)
     {
         return columns[col][row];
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline F mat3<F>::at(int row, int col) const
     {
         return columns[col][row];
@@ -270,25 +221,74 @@ namespace math
     // TODO:
     // ↓↓↓↓↓↓↓↓↓↓↓↓↓
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
+    inline mat2<F> mat3<F>::getSubmatrix(int row, int col) const
+    {
+        mat2<F> res;
+
+        // Calculates the indices of the two rowValues we need to use, and store them in the array
+
+        int rowIndices[2];
+
+        for (int i = 0; i < 2; i++)
+        {
+            if (i < row)
+            {
+                rowIndices[i] = i;
+            }
+            else 
+            {
+                rowIndices[i] = i + 1;
+            }
+        }
+
+        // Calculates the index of the column we need to use (twice)
+        // and assign the value of the res matrix to the column, and the index stored inside the rowIndices (twice : 0 then 1)
+
+        for (int i = 0; i < 2; i++)
+        {
+            int colToUse = 0;
+
+            if (i < col)
+            {
+                colToUse = i;
+            }
+            else
+            {
+                colToUse = i + 1;
+            }
+
+            res.columns[i][0] = this->columns[colToUse][rowIndices[0]];
+            res.columns[i][1] = this->columns[colToUse][rowIndices[1]];
+        }
+
+        return res;
+    }
+
+    template<FloatingNumber F>
     template<Number N>
     inline N mat3<F>::getMinor(int row, int col) const
     {
-        
+        mat2<F> mat = this->getSubmatrix(row, col);
+
+        return mat.template determinant<N>();
     }
 
-    template<std::floating_point F>
-    template<std::floating_point f>
-    inline mat2<f> mat3<F>::getSubmatrix(int row, int col) const
+    template<FloatingNumber F>
+    template<Number N>
+    inline N mat3<F>::getCofactor(int row, int col) const
     {
-        
+        N minor = this->template getMinor<N>(row, col);
+
+        return (row + col) % 2 == 0 ? minor * static_cast<N>(1.0) : minor * static_cast<N>(-1.0);
     }
+
 
     #pragma endregion MemberMethods
     
     #pragma region StaticMethods
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat3<F> mat3<F>::rotateX(F zAngDeg)
     {
         F ang = zAngDeg * math::degToRad<F>();
@@ -304,7 +304,7 @@ namespace math
         return res;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat3<F> mat3<F>::rotateY(F zAngDeg)
     {
         F ang = zAngDeg * math::degToRad<F>();
@@ -320,7 +320,7 @@ namespace math
         return res;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat3<F> mat3<F>::rotateZ(F zAngDeg)
     {
         F ang = zAngDeg * math::degToRad<F>();
@@ -335,7 +335,8 @@ namespace math
         return res;
     }
 
-    template<std::floating_point F>
+    
+    template<FloatingNumber F>
     inline mat3<F> mat3<F>::fromQuat(const quat<F>& rotationQuat)
     {
         F xx = rotationQuat.x * rotationQuat.x;
@@ -356,11 +357,12 @@ namespace math
         );
     }
 
+
     #pragma endregion 
 
     #pragma region ArithmeticOperators
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat3<F> operator+(const mat3<F>& a, const mat3<F>& b) 
     {
         mat3<F> res;
@@ -378,7 +380,7 @@ namespace math
         return res;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat3<F> operator-(const mat3<F>& a, const mat3<F>& b) 
     {
         mat3<F> res;
@@ -396,7 +398,7 @@ namespace math
         return res;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat3<F> operator*(const mat3<F>& a, const mat3<F>& b) 
     {
         mat3<F> res;
@@ -416,7 +418,7 @@ namespace math
         return res;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat3<F> operator*(const mat3<F>& mat, F scalar) 
     {
         mat3<F> res;
@@ -434,7 +436,7 @@ namespace math
         return res;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat3<F> operator*(F scalar, const mat3<F>& mat) 
     {
         mat3<F> res;
@@ -452,7 +454,7 @@ namespace math
         return res;
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline vec3<F> operator*(const mat3<F>& mat, const vec3<F>& vec) 
     {
         return vec3<F>(
@@ -462,7 +464,7 @@ namespace math
         );
     }
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat3<F> operator/(const mat3<F>& mat, F scalar) 
     {
         if (scalar == static_cast<F>(0.0)) return mat;

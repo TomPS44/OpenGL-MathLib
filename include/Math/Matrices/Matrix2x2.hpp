@@ -12,7 +12,7 @@ namespace math
     // ( [0][1] [1][1] )
     // 
     //
-    template<std::floating_point F>
+    template<FloatingNumber F>
     struct mat2
     {
     public:
@@ -29,22 +29,20 @@ namespace math
 
         mat2();
 
-        template<std::floating_point f>
+        template<FloatingNumber f>
         mat2<f> as() const;
 
         static mat2 rotateZ(F zAngDeg);
 
-        template<Number N>
+        template<Number N = F>
         N determinant() const;
 
         mat2& inverted();
         mat2& transposed();
 
-        template<std::floating_point f = F>
-        mat2<f> getInvertedMat() const;
+        mat2 getInvertedMat() const;
 
-        template<std::floating_point f = F>
-        mat2<f> getTransposedMat() const;
+        mat2 getTransposedMat() const;
 
 
         static mat2<F> diagonal(F diagonal);
@@ -56,22 +54,22 @@ namespace math
         F at(int row, int col) const;        
     };
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat2<F> operator+(const mat2<F>& a, const mat2<F>& b);
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat2<F> operator-(const mat2<F>& a, const mat2<F>& b);
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat2<F> operator*(const mat2<F>& a, const mat2<F>& b);
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat2<F> operator*(const mat2<F>& a, F scalar);
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat2<F> operator*(F scalar, const mat2<F>& a);
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline vec2<F> operator*(const mat2<F>& a, const vec2<F>& vec);
 
-    template<std::floating_point F>
+    template<FloatingNumber F>
     inline mat2<F> operator/(const mat2<F>& a, F scalar);
 }
 
