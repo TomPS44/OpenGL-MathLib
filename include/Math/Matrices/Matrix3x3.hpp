@@ -4,7 +4,7 @@
 
 #include "Math\Concepts.hpp"
 
-namespace math
+namespace glMath
 {
      
     template<FloatingNumber F>
@@ -20,7 +20,7 @@ namespace math
     // ( [0][2] [1][2] [2][2] )
     //
     template<FloatingNumber F>
-    struct mat3
+    struct alignas(sizeof(F) * 4) mat3
     {
     public:
         union
@@ -51,11 +51,11 @@ namespace math
         /// @return A mat3 coming from the rotationQuat quaternion
         static mat3 fromQuat(const quat<F>& rotationQuat);
 
+        vec3<F> rotatePoint(const vec3<F>& point) const;
+        static vec3<F> rotatePoint(const mat3& mat, const vec3<F>& vec);
         
-        
-
-        template<Number N = F>
-        N determinant() const;
+        F determinant() const;
+        static F determinant(const mat3<F>& mat);
 
         mat3& inverted();
         mat3& transposed();
@@ -70,7 +70,9 @@ namespace math
 
         static mat3<F> diagonal(F diagonal);
 
-        static mat3<F> identity();
+        inline static mat3 identity() { return mat3(1.0, 0.0, 0.0,
+                                                    0.0, 1.0, 0.0,
+                                                    0.0, 0.0, 1.0); };
         
 
         F& at(int row, int col);
@@ -84,6 +86,18 @@ namespace math
         N getCofactor(int row, int col) const;
 
         mat2<F> getSubmatrix(int row, int col) const;
+
+
+        mat3& operator+(const mat3& other);
+        mat3& operator+(F scalar);
+
+        mat3& operator-(const mat3& other);
+        mat3& operator-(F scalar);
+
+        mat3& operator*(const mat3& other);
+        mat3& operator*(F scalar);
+        
+        mat3& operator/(F scalar);
     };
 
     template<FloatingNumber F>
@@ -103,6 +117,13 @@ namespace math
 
     template<FloatingNumber F>
     inline mat3<F> operator/(const mat3<F>& a, F scalar);
+
+
+
+    template<FloatingNumber F>
+    inline bool operator==(const mat3<F>& a, const mat3<F>& b);
+    template<FloatingNumber F>
+    inline bool operator!=(const mat3<F>& a, const mat3<F>& b);
 }
 
 #include "Math\Matrices\Matrix3x3.inl"

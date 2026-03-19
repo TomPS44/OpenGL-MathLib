@@ -3,7 +3,7 @@
 #include <concepts>
 #include "Math\Concepts.hpp"
 
-namespace math
+namespace glMath
 {
     template<FloatingNumber F>
     struct quat;
@@ -25,7 +25,7 @@ namespace math
         dualQuat(const quat<F>& rotation);
         dualQuat(const vec3<F>& translation);
         
-        static dualQuat<F> identity();
+        inline static dualQuat identity() { return dualQuat(quat<F>(1.0, 0.0, 0.0, 0.0), quat<F>(0.0, 0.0, 0.0, 0.0)); };
 
         template<FloatingNumber type>
         dualQuat<type> as() const;
@@ -35,16 +35,26 @@ namespace math
         vec3<F> getTranslation() const;
 
 
-        dualQuat& normalized();
-        dualQuat getUnitDualQuat() const;
+        dualQuat& normalize();
+        dualQuat getNormalizedDualQuat() const;
+        static dualQuat normalized(const dualQuat& dQuat);
 
-        dualQuat& conjugated();
+        dualQuat& conjugate();
         dualQuat getConjugatedDualQuat() const;
+        static dualQuat conjugated(const dualQuat& dQuat);
 
-        dualQuat& inversed();
-        dualQuat getInversedDualQuat() const;
+        dualQuat& inverse();
+        dualQuat getInvertedDualQuat() const;
+        static dualQuat inverted(const dualQuat& dQuat);
 
 
+        dualQuat combineLocal(const dualQuat& other) const;
+        static dualQuat combineLocal(const dualQuat& a, const dualQuat& b);
+        dualQuat combineGlobal(const dualQuat& other) const;
+        static dualQuat combineGlobal(const dualQuat& a, const dualQuat& b);
+
+
+        mat3<F> toMat3() const;
         mat4<F> toMat4() const;
 
         static dualQuat<F> lerp(const dualQuat<F>& start, const dualQuat<F>& end, F t);

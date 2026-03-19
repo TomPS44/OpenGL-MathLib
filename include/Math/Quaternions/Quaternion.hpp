@@ -3,7 +3,7 @@
 #include "Math\Concepts.hpp"
 
 
-namespace math
+namespace glMath
 {
     template<FloatingNumber F>
     struct vec3;
@@ -29,12 +29,12 @@ namespace math
         quat(F qw, const vec3<F>& xyz);
         quat(F qw, F qx, F qy, F qz);
 
-        static quat<F> identity();
+        inline static quat identity() { return quat(1.0, 0.0, 0.0, 0.0); };
         static quat<F> getPureQuat(const vec3<F>& vec);
 
         
-        vec3<F> XYZ() const;
-        vec3<F> ZYX() const;
+        inline vec3<F> xyz() const { return vec3<F>(x, y, z); };
+        inline vec3<F> zyx() const { return vec3<F>(z, y, x); };
 
 
         template<FloatingNumber type>
@@ -43,29 +43,28 @@ namespace math
 
         F* valuePtr() const;
 
-        quat& normalized();
-        quat getUnitQuat() const;
+        quat& normalize();
+        quat getNormalizedQuat() const;
 
-        quat& conjugated();
+        quat& conjugate();
         quat getConjugatedQuat() const;
 
-        quat& inversed();
-        quat getInversedQuat() const;
+        quat& inverse();
+        quat getInvertedQuat() const;
 
-        template<Number N = F>
-        N length() const;
-        template<Number N = F>
-        N lengthSquared() const;
+        quat combineLocal(const quat& other) const;
+        static quat combineLocal(const quat& a, const quat& b);
+        quat combineGlobal(const quat& other) const;
+        static quat combineGlobal(const quat& a, const quat& b);
 
-        template<Number N = F>
-        static N length(const quat& quat);
-        template<Number N = F>
-        static N lengthSquared(const quat& quat);
+        F length() const;
+        F lengthSquared() const;
 
-        template<Number N = F>
-        N dotProduct(const quat<F>& other) const;
-        template<Number N = F>
-        static N dotProduct(const quat<F>& a, const quat<F>& b);
+        static F length(const quat& quat);
+        static F lengthSquared(const quat& quat);
+
+        F dotProduct(const quat<F>& other) const;
+        static F dotProduct(const quat<F>& a, const quat<F>& b);
 
         vec3<F> rotatePoint(const vec3<F>& point) const;
         vec3<F> rotatePointAroundPivot(const vec3<F>& point, const vec3<F>& pivot) const;

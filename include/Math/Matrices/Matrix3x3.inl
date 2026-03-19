@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-namespace math
+namespace glMath
 {
     
     #pragma region Constructors
@@ -67,19 +67,6 @@ namespace math
         return baseMat;
     }
 
-    template<FloatingNumber F>
-    inline mat3<F> mat3<F>::identity()
-    {
-        mat3<F> baseMat;
-
-        F f1 = static_cast<F>(1.0);
-
-        baseMat.columns[0][0] = f1;
-        baseMat.columns[1][1] = f1;
-        baseMat.columns[2][2] = f1;
-
-        return baseMat;
-    }
 
     #pragma endregion StaticConstructors
     
@@ -89,28 +76,46 @@ namespace math
     template<FloatingNumber f>
     inline mat3<f> mat3<F>::as() const
     {
+        std::numeric_limits<f> limit = std::numeric_limits<f>();
+        f minLimit = limit.lowest();
+        f maxLimit = limit.max();
+        
+
         mat3<f> res;
 
-        res.indices[0] = static_cast<f>(indices[0]);
-        res.indices[1] = static_cast<f>(indices[1]);
-        res.indices[2] = static_cast<f>(indices[2]);
-        res.indices[3] = static_cast<f>(indices[3]);
-        res.indices[4] = static_cast<f>(indices[4]);
-        res.indices[5] = static_cast<f>(indices[5]);
-        res.indices[6] = static_cast<f>(indices[6]);
-        res.indices[7] = static_cast<f>(indices[7]);
-        res.indices[8] = static_cast<f>(indices[8]);
-        
+        res.indices[0] = std::clamp(static_cast<f>(indices[0]), minLimit, maxLimit);
+        res.indices[1] = std::clamp(static_cast<f>(indices[1]), minLimit, maxLimit);
+        res.indices[2] = std::clamp(static_cast<f>(indices[2]), minLimit, maxLimit);
+        res.indices[3] = std::clamp(static_cast<f>(indices[3]), minLimit, maxLimit);
+        res.indices[4] = std::clamp(static_cast<f>(indices[4]), minLimit, maxLimit);
+        res.indices[5] = std::clamp(static_cast<f>(indices[5]), minLimit, maxLimit);
+        res.indices[6] = std::clamp(static_cast<f>(indices[6]), minLimit, maxLimit);
+        res.indices[7] = std::clamp(static_cast<f>(indices[7]), minLimit, maxLimit);
+        res.indices[8] = std::clamp(static_cast<f>(indices[8]), minLimit, maxLimit);
+
         return res;
+    }
+
+
+    template<FloatingNumber F>
+    inline vec3<F> mat3<F>::rotatePoint(const mat3<F>& mat, const vec3<F>& point) 
+    {
+        return mat * point;
     }
 
     #pragma endregion Casting
     
     #pragma region MemberMethods
+
+    template<FloatingNumber F>
+    inline vec3<F> mat3<F>::rotatePoint(const vec3<F>& point) const
+    {
+        return *this * point;
+    }
+
     
     template<FloatingNumber F>
-    template<Number N>
-    inline N mat3<F>::determinant() const
+    inline F mat3<F>::determinant() const
     {
         return columns[0][0] * (columns[1][1] * columns[2][2] - columns[2][1] * columns[1][2]) - 
                columns[1][0] * (columns[0][1] * columns[2][2] - columns[0][2] * columns[2][1]) + 
@@ -120,9 +125,9 @@ namespace math
     template<FloatingNumber F>
     inline mat3<F>& mat3<F>::inverted()
     {
-        F det = this->determinant<F>();
+        F det = this->determinant();
     
-        if (std::abs(det) > math::epsilon<F>()) 
+        if (std::abs(det) > glMath::epsilon<F>()) 
         { 
             *this = this->getAdjugateMat() * (static_cast<F>(1.0) / det);  
         }
@@ -289,9 +294,16 @@ namespace math
     #pragma region StaticMethods
 
     template<FloatingNumber F>
+    inline F mat3<F>::determinant(const mat3<F>& mat)
+    {
+        return mat.determinant();
+    }
+
+
+    template<FloatingNumber F>
     inline mat3<F> mat3<F>::rotateX(F zAngDeg)
     {
-        F ang = zAngDeg * math::degToRad<F>();
+        F ang = zAngDeg * glMath::degToRad<F>();
         F cosAng = static_cast<F>(std::cos(ang));
         F sinAng = static_cast<F>(std::sin(ang));
 
@@ -307,7 +319,7 @@ namespace math
     template<FloatingNumber F>
     inline mat3<F> mat3<F>::rotateY(F zAngDeg)
     {
-        F ang = zAngDeg * math::degToRad<F>();
+        F ang = zAngDeg * glMath::degToRad<F>();
         F cosAng = static_cast<F>(std::cos(ang));
         F sinAng = static_cast<F>(std::sin(ang));
 
@@ -323,7 +335,7 @@ namespace math
     template<FloatingNumber F>
     inline mat3<F> mat3<F>::rotateZ(F zAngDeg)
     {
-        F ang = zAngDeg * math::degToRad<F>();
+        F ang = zAngDeg * glMath::degToRad<F>();
         F cosAng = static_cast<F>(std::cos(ang));
         F sinAng = static_cast<F>(std::sin(ang));
 
@@ -359,6 +371,50 @@ namespace math
 
 
     #pragma endregion 
+
+    #pragma region ReferenceOperators
+
+    template<FloatingNumber F>
+    inline mat3<F>& mat3<F>::operator+(const mat3<F>& other)
+    {
+        return *this + other;
+    }
+    template<FloatingNumber F>
+    inline mat3<F>& mat3<F>::operator+(F scalar)
+    {
+        return *this + scalar;
+    }
+
+    template<FloatingNumber F>
+    inline mat3<F>& mat3<F>::operator-(const mat3<F>& other)
+    {
+        return *this - other;
+    }
+    template<FloatingNumber F>
+    inline mat3<F>& mat3<F>::operator-(F scalar)
+    {
+        return *this - scalar;
+    }
+
+    template<FloatingNumber F>
+    inline mat3<F>& mat3<F>::operator*(const mat3<F>& other)
+    {
+        return *this * other;
+    }
+    template<FloatingNumber F>
+    inline mat3<F>& mat3<F>::operator*(F scalar)
+    {
+        return *this * scalar;
+    }
+
+    template<FloatingNumber F>
+    inline mat3<F>& mat3<F>::operator/(F scalar)
+    {
+        return *this * scalar;
+    }
+
+    #pragma endregion 
+
 
     #pragma region ArithmeticOperators
 
@@ -458,9 +514,9 @@ namespace math
     inline vec3<F> operator*(const mat3<F>& mat, const vec3<F>& vec) 
     {
         return vec3<F>(
-        mat.columns[0][0] * vec.x + mat.columns[1][0] * vec.y + mat.columns[2][0] * vec.z,
-        mat.columns[0][1] * vec.x + mat.columns[1][1] * vec.y + mat.columns[2][1] * vec.z,
-        mat.columns[0][2] * vec.x + mat.columns[1][2] * vec.y + mat.columns[2][2] * vec.z
+            mat.columns[0][0] * vec.x + mat.columns[1][0] * vec.y + mat.columns[2][0] * vec.z,
+            mat.columns[0][1] * vec.x + mat.columns[1][1] * vec.y + mat.columns[2][1] * vec.z,
+            mat.columns[0][2] * vec.x + mat.columns[1][2] * vec.y + mat.columns[2][2] * vec.z
         );
     }
 
@@ -484,6 +540,28 @@ namespace math
         res.indices[8] = mat.indices[8] * invScalar;
 
         return res;
+    }
+
+
+
+    template<FloatingNumber F>
+    inline bool operator==(const mat3<F>& a, const mat3<F>& b) 
+    {
+        for (int i = 0; i < 9; i++)
+        {
+            if (std::abs(b.indices[i] - a.indices[i]) > glMath::epsilon<F>())
+            {
+                return false;
+            } 
+        }
+
+        return true;
+    }
+
+    template<FloatingNumber F>
+    inline bool operator!=(const mat3<F>& a, const mat3<F>& b)
+    {
+        return !(a == b);
     }
 
     #pragma endregion 

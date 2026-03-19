@@ -3,7 +3,7 @@
 #include <concepts>
 #include <type_traits>
 
-namespace math
+namespace glMath
 {
     // The concept Number allows all the types that are the same as 
     // int, float, double, long, long long, long double
@@ -23,16 +23,26 @@ namespace math
         std::is_same_v<T, float>  ||
         std::is_same_v<T, double> ;
 
-    // The concept IsComparable encapsulates all the types that define the operators 
-    // < , > , == , !=
+    // The concept IsComparable allows all the types that define the operators 
+    // < , >, <=, >= , == , !=
     template<typename T>
-    concept IsComparable =
+    concept Comparable =
         requires (T a, T b)
         {
             a > b;
+            a >= b;
             a < b;
+            a <= b;
             a == b;
             a != b;
         };
+    // The concept IntegralNumber allows all the types that are the same as 
+    // int, long, (these 2 are the same), long long
+    template<typename T>
+    concept IntegralNumber = 
+        std::is_same_v<T, int>      ||
+        std::is_same_v<T, long>     ||
+        std::is_same_v<T, long long>;
+        
     
 }

@@ -1,31 +1,34 @@
 #pragma once
 #include <cmath>
 
+#include <stdint.h>
+#include <algorithm>
+
 #include "Math\Concepts.hpp"
 
-namespace math
+namespace glMath
 {
    
     // Min and Max methods, taking two or an infinite number of arguments 
-    template<IsComparable T>
+    template<Comparable T>
     T max(T a, T b) 
     {
         return a > b ? a : b;
     }
-    template<IsComparable T>
+    template<Comparable T>
     T min(T a, T b) 
     {
         return a < b ? a : b;
     }
 
-    template<IsComparable T, IsComparable... Args>
+    template<Comparable T, Comparable... Args>
     T max(T first, Args... args) 
     {
         T result = first;
         ((result = max(result, args)), ...); 
         return result;
     }
-    template<IsComparable T, IsComparable... Args>
+    template<Comparable T, Comparable... Args>
     T min(T first, Args... args) 
     {
         T result = first;
@@ -39,15 +42,12 @@ namespace math
     template<Number N>
     inline N clamp(N value, N minInclusive, N maxInclusive)
     {
-        if (value < minInclusive) value = minInclusive;
-        else if (value > maxInclusive) value = maxInclusive;
-
-        return value;
+        return std::clamp(value, minInclusive, maxInclusive);
     }
     template<Number N>
     inline N clamp01(N value)
     {
-        return clamp(value, static_cast<N>(0.0), static_cast<N>(1.0));
+        return std::clamp(value, static_cast<N>(0.0), static_cast<N>(1.0));
     }
 
 
@@ -115,6 +115,11 @@ namespace math
         return static_cast<N>(std::numbers::pi);
     }
     template<Number N>
+    inline N halfPi()
+    {
+        return static_cast<N>(std::numbers::pi * 0.5);
+    }
+    template<Number N>
     inline N twoPi()
     {
         return static_cast<N>(std::numbers::pi * 2.0);
@@ -147,13 +152,13 @@ namespace math
     template<Number N>
     inline N epsilon()
     {
-        return static_cast<N>(0.1e-06);
+        return static_cast<N>(0.1e-05);
     }
 
     template<std::floating_point F>
-    inline bool nearlyEqual(F lhs, F rhs)
+    inline bool nearlyEqual(F a, F b)
     {
-        return std::abs(rhs - lhs) < static_cast<F>(1e-06);
+        return std::abs(b - a) < static_cast<F>(1e-06);
     }
     
 }

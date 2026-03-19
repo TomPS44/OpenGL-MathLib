@@ -1,10 +1,13 @@
 #include <concepts>
 #include <cmath>
 
+#include <functional>
+#include <utility>
+
 #include "Math\MathInternal.hpp"
 
 
-namespace math
+namespace glMath
 {
 
     #pragma region Constructors
@@ -37,39 +40,9 @@ namespace math
     template <FloatingNumber F>
     inline vec2<F> vec2<F>::fromAngle(F angleInDeg)
     {
-        return vec2(static_cast<F>(std::cos(angleInDeg * math::degToRad<F>())), static_cast<F>(std::sin(angleInDeg * math::degToRad<F>())));
+        return vec2(static_cast<F>(std::cos(angleInDeg * glMath::degToRad<F>())), static_cast<F>(std::sin(angleInDeg * glMath::degToRad<F>())));
     }
     
-    template <FloatingNumber F>
-    inline vec2<F> vec2<F>::zero()
-    {
-        return vec2<F>(static_cast<F>(0.0), static_cast<F>(0.0));
-    }
-    template <FloatingNumber F>
-    inline vec2<F> vec2<F>::one()
-    {
-        return vec2<F>(static_cast<F>(1.0), static_cast<F>(1.0));
-    }
-    template <FloatingNumber F>
-    inline vec2<F> vec2<F>::up()
-    {
-        return vec2<F>(static_cast<F>(0.0), static_cast<F>(1.0));
-    }
-    template <FloatingNumber F>
-    inline vec2<F> vec2<F>::down()
-    {
-        return vec2<F>(static_cast<F>(0.0), static_cast<F>(-1.0));
-    }
-    template <FloatingNumber F>
-    inline vec2<F> vec2<F>::left()
-    {
-        return vec2<F>(static_cast<F>(-1.0), static_cast<F>(0.0));
-    }
-    template <FloatingNumber F>
-    inline vec2<F> vec2<F>::right()
-    {
-        return vec2<F>(static_cast<F>(1.0), static_cast<F>(0.0));
-    }
     
     #pragma endregion StaticConstructors
 
@@ -80,35 +53,25 @@ namespace math
     template<FloatingNumber f>
     inline vec2<f> vec2<F>::as() const
     {
-        return vec2<f>(static_cast<f>(x), static_cast<f>(y));
+        std::numeric_limits<f> limit = std::numeric_limits<f>();
+        f minLimit = limit.lowest();
+        f maxLimit = limit.max();
+
+        return vec2<f>(
+            std::clamp(static_cast<f>(x), minLimit, maxLimit), 
+            std::clamp(static_cast<f>(y), minLimit, maxLimit)
+        );
     }
 
-    template<FloatingNumber F>
-    inline vec2<F> vec2<F>::XX() const
-    {
-        return vec2<F>(x, x);
-    }
-
-    template<FloatingNumber F>
-    inline vec2<F> vec2<F>::YY() const
-    {
-        return vec2<F>(y, y);
-    }
-
-    template<FloatingNumber F>
-    inline vec2<F> vec2<F>::YX() const
-    {
-        return vec2<F>(y, x);
-    }
 
     #pragma endregion Casting
 
     #pragma region Normalizing
 
     template<FloatingNumber F>
-    inline vec2<F>& vec2<F>::normalized()
+    inline vec2<F>& vec2<F>::normalize()
     {
-        F l = this->length<F>();
+        F l = this->length();
         
         if (l > static_cast<F>(0.0)) 
         {
@@ -121,50 +84,77 @@ namespace math
     }
 
     template<FloatingNumber F>
-    inline vec2<F> vec2<F>::getUnitVector() const
+    inline vec2<F> vec2<F>::getNormalizedVec() const
     {
         vec2 copy = *this;
 
-        return copy.normalized();
+        return copy.normalize();
     }
 
     #pragma endregion Normalizing
 
     #pragma region MemberMethods
 
+
     template<FloatingNumber F>
-    template<Number N>
-    inline N vec2<F>::length() const
+    template<IntegralNumber i>
+    inline iVec2<i> vec2<F>::floorTo() const
     {
-        return static_cast<N>(std::sqrtf( (x * x) + (y * y) ));
+        
+        std::numeric_limits<i> limit = std::numeric_limits<i>();
+        F minLimit = static_cast<F>(limit.lowest());
+        F maxLimit = static_cast<F>(limit.max());
+
+        F fx = std::floor(x);
+        F fy = std::floor(y);
+
+        return iVec2<i>(
+            static_cast<i>(std::clamp(fx, minLimit, maxLimit)),
+            static_cast<i>(std::clamp(fy, minLimit, maxLimit))
+        );
+        
+    }
+
+
+    template<FloatingNumber F>
+    inline F vec2<F>::length() const
+    {
+        return std::sqrt( (x * x) + (y * y) );
     }
 
     template<FloatingNumber F>
-    template<Number N>
-    inline N vec2<F>::lengthSquared() const
+    inline F vec2<F>::lengthSquared() const
     {
-        return static_cast<N>( (x * x) + (y * y) );
+        return (x * x) + (y * y);
     }
 
     template<FloatingNumber F>
-    template<Number N>
-    inline N vec2<F>::dotProduct(const vec2& other) const
+    inline F vec2<F>::dotProduct(const vec2& other) const
     {
-        return static_cast<N>( (other.x * x) + (other.x * x) + (other.y * y) + (other.y * y) );
+        return (other.x * x) + (other.x * x) + (other.y * y) + (other.y * y);
     }
 
     template<FloatingNumber F>
-    template<Number N>
-    inline N vec2<F>::distance(const vec2& other) const
+    inline F vec2<F>::distance(const vec2& other) const
     {
-        return static_cast<N>(std::sqrtf( (other.x - x) * (other.x - x)  +  (other.y - y) * (other.y - y) ));
+        return std::sqrt( (other.x - x) * (other.x - x)  +  (other.y - y) * (other.y - y) );
     }
 
     template<FloatingNumber F>
-    template<Number N>
-    inline N vec2<F>::distanceSquared(const vec2& other) const
+    inline F vec2<F>::distanceSquared(const vec2& other) const
     {
-        return static_cast<N>((other.x - x) * (other.x - x)  +  (other.y - y) * (other.y - y) );
+        return (other.x - x) * (other.x - x)  +  (other.y - y) * (other.y - y);
+    }
+
+    template<FloatingNumber F>
+    inline vec2<F> vec2<F>::min(const vec2<F>& other) const
+    {
+        return vec2<F>(glMath::min(x, other.x), glMath::min(y, other.y));
+    }
+    template<FloatingNumber F>
+    inline vec2<F> vec2<F>::max(const vec2<F>& other) const
+    {
+        return vec2<F>(glMath::max(x, other.x), glMath::max(y, other.y));
     }
 
     #pragma endregion MemberMethods
@@ -172,48 +162,60 @@ namespace math
     #pragma region StaticMethods
 
     template<FloatingNumber F>
-    template<Number N>
-    inline N vec2<F>::angleBetween(const vec2<F>& a, const vec2<F>& b)
+    inline F vec2<F>::angleBetween(const vec2<F>& a, const vec2<F>& b)
     {
-        F dot = math::clamp( static_cast<F>(vec2<F>::dotProduct(a.getUnitVector(), b.getUnitVector()), static_cast<F>(-1.0), static_cast<F>(1.0)) );
+        F dot = glMath::clamp( vec2<F>::dotProduct(a.getNormalizedVec(), b.getNormalizedVec()), static_cast<F>(-1.0), static_cast<F>(1.0) );
 
-        return static_cast<F>(std::acos(dot));
+        return std::acos(dot);
     }
 
 
     template<FloatingNumber F>
-    template<Number N>
-    inline N vec2<F>::length(const vec2<F>& vec) 
+    inline vec2<F> vec2<F>::normalized(const vec2<F>& vec)
     {
-        return static_cast<N>(std::sqrtf( (vec.x * vec.x) + (vec.y * vec.y) ));
+        return vec.getNormalizedVec();
+    }
+
+
+    template<FloatingNumber F>
+    inline F vec2<F>::length(const vec2<F>& vec) 
+    {
+        return std::sqrt( (vec.x * vec.x) + (vec.y * vec.y) );
     }
 
     template<FloatingNumber F>
-    template<Number N>
-    inline N vec2<F>::lengthSquared(const vec2& vec) 
+    inline F vec2<F>::lengthSquared(const vec2& vec) 
     {
-        return static_cast<N>( (vec.x * vec.x) + (vec.y * vec.y) );
+        return (vec.x * vec.x) + (vec.y * vec.y);
     }
 
     template<FloatingNumber F>
-    template<Number N>
-    inline N vec2<F>::dotProduct(const vec2& a, const vec2& b)
+    inline F vec2<F>::dotProduct(const vec2& a, const vec2& b)
     {
-        return static_cast<N>( (a.x * b.x) + (a.y * b.y) );
+        return (a.x * b.x) + (a.y * b.y);
     }
 
     template<FloatingNumber F>
-    template<Number N>
-    inline N vec2<F>::distance(const vec2& a, const vec2& b) 
+    inline F vec2<F>::distance(const vec2& a, const vec2& b) 
     {
-        return static_cast<N>(std::sqrtf( (b.x - a.x) * (b.x - a.x)  +  (b.y - a.y) * (b.y - a.y) ));
+        return std::sqrt( (b.x - a.x) * (b.x - a.x)  +  (b.y - a.y) * (b.y - a.y) );
     }
 
     template<FloatingNumber F>
-    template<Number N>
-    inline N vec2<F>::distanceSquared(const vec2& a, const vec2& b) 
+    inline F vec2<F>::distanceSquared(const vec2& a, const vec2& b) 
     {
-        return static_cast<N>( (b.x - a.x) * (b.x - a.x)  +  (b.y - a.y) * (b.y - a.y) );
+        return (b.x - a.x) * (b.x - a.x)  +  (b.y - a.y) * (b.y - a.y);
+    }
+
+    template<FloatingNumber F>
+    inline vec2<F> vec2<F>::min(const vec2<F>& a, const vec2<F>& b)
+    {
+        return vec2<F>(glMath::min(a.x, b.x), glMath::min(a.y, b.y));
+    }
+    template<FloatingNumber F>
+    inline vec2<F> vec2<F>::max(const vec2<F>& a, const vec2<F>& b)
+    {
+        return vec2<F>(glMath::max(a.x, b.x), glMath::max(a.y, b.y));
     }
 
     template<FloatingNumber F>
@@ -227,6 +229,32 @@ namespace math
     inline vec2<F> vec2<F>::lerpUnclamped(const vec2<F>& start, const vec2<F>& end, F t)
     {
         return vec2<F>(start.x + (end.x - start.x) * t, start.y + (end.y - start.y) * t);
+    }
+
+
+    template<FloatingNumber F>
+    inline vec2<F> vec2<F>::slerp(const vec2<F>& start, const vec2<F>& end, F t)
+    {
+        t = glMath::clamp01(t);
+        return vec2<F>::slerpUnclamped(start, end, t);
+    }
+    template<FloatingNumber F>
+    inline vec2<F> vec2<F>::slerpUnclamped(const vec2<F>& start, const vec2<F>& end, F t)
+    {
+        F dot = vec2<F>::dotProduct(start, end);
+
+        if (dot > static_cast<F>(0.9995))
+        {
+            return vec2<F>::lerpUnclamped(start, end, t);
+        }
+
+        F ang = std::acos(dot);
+        F sinAng = std::sin(ang);
+
+        F wA = std::sin((static_cast<F>(1.0) - t) * ang) / sinAng;
+        F wB = std::sin(t * ang) / sinAng;
+
+        return (start * wA) + (end * wB);
     }
 
 
@@ -291,13 +319,36 @@ namespace math
     {
         return vec2(a.x + b.x, a.y + b.y);
     }
+    template<FloatingNumber F>
+    inline vec2<F> operator+(const vec2<F>& a, F scalar)
+    {
+        return vec2(a.x + scalar, a.y + scalar);
+    }
 
     template<FloatingNumber F>
     inline vec2<F> operator-(const vec2<F>& a, const vec2<F>& b)
     {
         return vec2(a.x - b.x, a.y - b.y);
     }
+    template<FloatingNumber F>
+    inline vec2<F> operator-(const vec2<F>& a, F scalar)
+    {
+        return vec2(a.x - scalar, a.y - scalar);
+    }
+    
 
+    template <FloatingNumber F>
+    inline vec2<F> vec2<F>::operator-() const
+    {
+        return vec2(-x, -y);
+    }
+
+
+    template<FloatingNumber F>
+    inline vec2<F> operator*(const vec2<F>& a, const vec2<F>& b)
+    {
+        return vec2(a.x * b.x, a.y * b.y);
+    }
     template<FloatingNumber F>
     inline vec2<F> operator*(const vec2<F>& vec, F scalar)
     {
@@ -323,8 +374,8 @@ namespace math
     template<FloatingNumber F>
     inline bool operator==(const vec2<F>& a, const vec2<F>& b)
     {
-        return static_cast<F>( std::abs(b.x - a.x) ) < math::epsilon<F>() &&
-               static_cast<F>( std::abs(b.y - a.y) ) < math::epsilon<F>();
+        return static_cast<F>( std::abs(b.x - a.x) ) < glMath::epsilon<F>() &&
+               static_cast<F>( std::abs(b.y - a.y) ) < glMath::epsilon<F>();
     }
 
     template<FloatingNumber F>

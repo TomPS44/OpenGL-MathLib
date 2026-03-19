@@ -3,7 +3,7 @@
 
 #include "Math\MathInternal.hpp"
 
-namespace math
+namespace glMath
 {
 
     #pragma region Constructors
@@ -51,32 +51,15 @@ namespace math
     }
 
     #pragma endregion
-
-    #pragma region StaticConstructors
-
-    template<FloatingNumber F>
-    inline dualQuat<F> dualQuat<F>::identity()
-    {
-        F f0 = static_cast<F>(0.0);
-
-        dualQuat<F> res;
-
-        res.real = quat<F>::identity();
-        res.dual = quat<F>(f0, f0, f0, f0);
-
-        return res;
-    }
-
-    #pragma endregion
     
     #pragma region Normalizing
 
     template <FloatingNumber F>
-    inline dualQuat<F>& dualQuat<F>::normalized()
+    inline dualQuat<F>& dualQuat<F>::normalize()
     {
-        F l = real.template length<F>();
+        F l = real.length();
 
-        if (std::abs(l) > math::epsilon<F>())
+        if (std::abs(l) > glMath::epsilon<F>())
         {
             F invLen = static_cast<F>(1.0) / l;
 
@@ -88,15 +71,22 @@ namespace math
     }
 
     template <FloatingNumber F>
-    inline dualQuat<F> dualQuat<F>::getUnitDualQuat() const
+    inline dualQuat<F> dualQuat<F>::getNormalizedDualQuat() const
     {
         dualQuat<F> copy = *this;
 
-        return copy.normalized();
+        return copy.normalize();
     }
 
+    template<FloatingNumber F>
+    inline dualQuat<F> dualQuat<F>::normalized(const dualQuat<F>& dQuat)
+    {
+        return dQuat.getNormalizedDualQuat();
+    }
+
+
     template <FloatingNumber F>
-    inline dualQuat<F>& dualQuat<F>::conjugated()
+    inline dualQuat<F>& dualQuat<F>::conjugate()
     {
         real = real * static_cast<F>(-1.0);
         dual = dual * static_cast<F>(-1.0);
@@ -109,15 +99,22 @@ namespace math
     {
         dualQuat<F> copy = *this;
 
-        return copy.conjugated();
+        return copy.conjugate();
     }
 
+    template<FloatingNumber F>
+    inline dualQuat<F> dualQuat<F>::conjugated(const dualQuat<F>& dQuat)
+    {
+        return dQuat.getConjugatedDualQuat();
+    }
+
+
     template <FloatingNumber F>
-    inline dualQuat<F>& dualQuat<F>::inversed()
+    inline dualQuat<F>& dualQuat<F>::inverse()
     {
         F lSqr2 = real.lengthSquared();
 
-        if (lSqr2 > math::epsilon<F>())
+        if (lSqr2 > glMath::epsilon<F>())
         {
             F lSqr4 = lSqr2 * lSqr2;
 
@@ -138,11 +135,17 @@ namespace math
     }
 
     template <FloatingNumber F>
-    inline dualQuat<F> dualQuat<F>::getInversedDualQuat() const
+    inline dualQuat<F> dualQuat<F>::getInvertedDualQuat() const
     {
         dualQuat<F> copy = *this;
 
-        return copy.inversed();
+        return copy.inverse();
+    }
+
+    template<FloatingNumber F>
+    inline dualQuat<F> dualQuat<F>::inverted(const dualQuat<F>& dQuat)
+    {
+        return dQuat.getInvertedDualQuat();
     }
 
     #pragma endregion
@@ -170,10 +173,31 @@ namespace math
     inline vec3<F> dualQuat<F>::getTranslation() const
     {
 
-        return  ( static_cast<F>(2.0) * (dual * real.getConjugatedQuat()) ).template XYZ();
+        return  ( static_cast<F>(2.0) * (dual * real.getConjugatedQuat()) ).template xyz();
     }
 
-    
+
+    template<FloatingNumber F>
+    inline mat3<F> dualQuat<F>::toMat3() const
+    {
+        F xx = real.x * real.x;
+        F yy = real.y * real.y;
+        F zz = real.z * real.z;
+        F xy = real.x * real.y;
+        F wz = real.w * real.z;
+        F wy = real.w * real.y;
+        F wx = real.w * real.x;
+        F xz = real.x * real.z;
+        F yz = real.y * real.z;
+
+        F f0 = static_cast<F>(0.0);
+
+
+        return mat3<F>(1 - 2 * (yy + zz), 2 * (xy - wz)    , 2 * (xz + wy),
+                       2 * (xy + wz)    , 1 - 2 * (xx + zz), 2 * (yz - wx),
+                       2 * (xz - wy)    , 2 * (yz + wx)    , 1 - 2 * (xx + yy)
+        );
+    }
 
     template<FloatingNumber F>
     inline mat4<F> dualQuat<F>::toMat4() const
@@ -205,34 +229,41 @@ namespace math
         return vec3<F>(rotatedPoint + this->getTranslation());
     }
 
-    
+    template<FloatingNumber F>
+    inline dualQuat<F> dualQuat<F>::combineLocal(const dualQuat<F>& other) const
+    {
+        return (*this * other).getNormalizedDualQuat();
+    }
+    template<FloatingNumber F>
+    inline dualQuat<F> dualQuat<F>::combineGlobal(const dualQuat<F>& other) const
+    {
+        return (other * *this).getNormalizedDualQuat();
+    }
+
     #pragma endregion
 
     #pragma region StaticMethods
 
+
+    
+    template<FloatingNumber F>
+    inline dualQuat<F> dualQuat<F>::combineLocal(const dualQuat<F>& a, const dualQuat<F>& b)
+    {
+        return (a * b).getNormalizedDualQuat();
+    }
+    template<FloatingNumber F>
+    inline dualQuat<F> dualQuat<F>::combineGlobal(const dualQuat<F>& a, const dualQuat<F>& b)
+    {
+        return (b * a).getNormalizedDualQuat();
+    }
+
+
     template<FloatingNumber F>
     inline dualQuat<F> dualQuat<F>::lerp(const dualQuat<F>& start, const dualQuat<F>& end, F t) 
     {
-        t = math::clamp01(t);
+        t = glMath::clamp01(t);
 
-        #if 0
-
-        dualQuat<F> trueEnd = end;
-
-        if (quat<F>::dotProduct(start.real, end.real) < static_cast<F>(0.0)) 
-        {
-            trueEnd *= static_cast<F>(-1.0);
-        }
-
-        dualQuat<F> interp = { (static_cast<F>(1.0) - t) * start, t * trueEnd };
-
-        return interp.normalized();
-
-        #else 
-        
         return dualQuat<F>::lerpUnclamped(start, end, t);
-
-        #endif
     }
 
     template<FloatingNumber F>
@@ -247,7 +278,7 @@ namespace math
         
         dualQuat<F> interp = (static_cast<F>(1.0) - t) * start + t * trueEnd;
         
-        return interp.normalized();
+        return interp.normalize();
     }
     
     template<FloatingNumber F>

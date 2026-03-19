@@ -1,9 +1,11 @@
 #include <concepts>
 #include <cmath>
 
+#include <algorithm>
+
 #include "Math\MathInternal.hpp"
 
-namespace math
+namespace glMath
 {
     #pragma region Constructors
 
@@ -41,14 +43,6 @@ namespace math
     #pragma region StaticConstructors
 
     template<FloatingNumber F>
-    inline quat<F> quat<F>::identity()
-    {
-        F f0 = static_cast<F>(0.0);
-
-        return quat<F>(static_cast<F>(1.0), f0, f0, f0);
-    }
-
-    template<FloatingNumber F>
     inline quat<F> quat<F>::getPureQuat(const vec3<F>& vec)
     {
         return quat<F>(static_cast<F>(0.0), vec.x, vec.y, vec.z);
@@ -66,9 +60,9 @@ namespace math
     {
         // return quat<F>::fromEuler( vec3<F>(vx, vy, vz) );
 
-        F qx = (vx * math::degToRad<F>()) * static_cast<F>(0.5);
-        F qy = (vy * math::degToRad<F>()) * static_cast<F>(0.5);
-        F qz = (vz * math::degToRad<F>()) * static_cast<F>(0.5);
+        F qx = (vx * glMath::degToRad<F>()) * static_cast<F>(0.5);
+        F qy = (vy * glMath::degToRad<F>()) * static_cast<F>(0.5);
+        F qz = (vz * glMath::degToRad<F>()) * static_cast<F>(0.5);
 
         F cx = std::cos(qx); F sx = std::sin(qx);
         F cy = std::cos(qy); F sy = std::sin(qy);
@@ -102,22 +96,19 @@ namespace math
     #pragma region Casting
 
     template<FloatingNumber F>
-    inline vec3<F> quat<F>::XYZ() const
-    {
-        return vec3<F>(x, y, z);
-    }
-
-    template<FloatingNumber F>
-    inline vec3<F> quat<F>::ZYX() const
-    {
-        return vec3<F>(z, y, x);
-    }
-
-    template<FloatingNumber F>
     template<FloatingNumber f>
     inline quat<f> quat<F>::as() const
     {
-        return quat<f>(static_cast<f>(w), static_cast<f>(x), static_cast<f>(y), static_cast<f>(z));
+        std::numeric_limits<f> limit = std::numeric_limits<f>();
+        f minLimit = limit.lowest();
+        f maxLimit = limit.max();
+
+        return quat<f>(
+            std::clamp(static_cast<f>(w), minLimit, maxLimit), 
+            std::clamp(static_cast<f>(x), minLimit, maxLimit), 
+            std::clamp(static_cast<f>(y), minLimit, maxLimit), 
+            std::clamp(static_cast<f>(z), minLimit, maxLimit)
+        );
     }
 
 
@@ -126,11 +117,11 @@ namespace math
     #pragma region Normalizing
 
     template<FloatingNumber F>
-    inline quat<F>& quat<F>::normalized()   
+    inline quat<F>& quat<F>::normalize()   
     {
-        F l = this->length<F>();
+        F l = this->length();
 
-        if (std::abs(l) > math::epsilon<F>()) 
+        if (std::abs(l) > glMath::epsilon<F>()) 
         {
             F invLen = static_cast<F>(1.0) / l;
     
@@ -144,16 +135,16 @@ namespace math
     }
  
     template<FloatingNumber F>
-    inline quat<F> quat<F>::getUnitQuat() const
+    inline quat<F> quat<F>::getNormalizedQuat() const
     {
         quat copy = *this;
 
-        return copy.normalized();
+        return copy.normalize();
     }
 
 
     template<FloatingNumber F>
-    inline quat<F>& quat<F>::conjugated()
+    inline quat<F>& quat<F>::conjugate()
     {
         x *= static_cast<F>(-1.0);
         y *= static_cast<F>(-1.0);
@@ -167,17 +158,17 @@ namespace math
     {
         quat copy = *this;
 
-        return copy.conjugated();
+        return copy.conjugate();
     }
 
 
     template<FloatingNumber F>
-    inline quat<F>& quat<F>::inversed()
+    inline quat<F>& quat<F>::inverse()
     {
         quat<F> conj = this->getConjugatedQuat();
         F l = this->lengthSquared();
 
-        if (l > math::epsilon<F>())
+        if (l > glMath::epsilon<F>())
         {
             w = conj.w / l;
             x = conj.x / l; 
@@ -189,11 +180,11 @@ namespace math
     }
 
     template<FloatingNumber F>
-    inline quat<F> quat<F>::getInversedQuat() const
+    inline quat<F> quat<F>::getInvertedQuat() const
     {
         quat copy = *this;
 
-        return copy.inversed();
+        return copy.inverse();
     }
 
     #pragma endregion
@@ -208,25 +199,22 @@ namespace math
 
 
     template<FloatingNumber F>
-    template<Number N>
-    inline N quat<F>::length() const 
+    inline F quat<F>::length() const 
     {
-        return static_cast<N>(std::sqrt( (w * w) + (x * x) + (y * y) + (z * z) ));
+        return std::sqrt( (w * w) + (x * x) + (y * y) + (z * z) );
     }
 
     template<FloatingNumber F>
-    template<Number N>
-    inline N quat<F>::lengthSquared() const 
+    inline F quat<F>::lengthSquared() const 
     {
-        return static_cast<N>( (w * w) + (x * x) + (y * y) + (z * z) );
+        return (w * w) + (x * x) + (y * y) + (z * z);
     }
 
     
     template<FloatingNumber F>
-    template<Number N>
-    inline N quat<F>::dotProduct(const quat<F>& other) const
+    inline F quat<F>::dotProduct(const quat<F>& other) const
     {
-        return static_cast<N>( (w * other.w) + (x * other.x) + (y * other.y) + (z * other.z) );
+        return (w * other.w) + (x * other.x) + (y * other.y) + (z * other.z);
     }
 
 
@@ -276,61 +264,165 @@ namespace math
     template<FloatingNumber F>
     inline vec3<F> quat<F>::toEuler() const
     {
+        /*
         vec3<F> angles;
-
-        F sinX = static_cast<F>(2.0) * (w * x - y * z);
+        
+        
+        F f0 = static_cast<F>(0.0);
+        F f05 = static_cast<F>(0.5);
+        F f1 = static_cast<F>(1.0);
+        F f2 = static_cast<F>(2.0);
+        
+        
+        
+        F sinX = f2 * (w * x - y * z);
         
         if (std::abs(sinX) >= static_cast<F>(0.99999)) 
         {
-            angles.x = std::copysign(math::pi<F>() / static_cast<F>(2.0), sinX);
-            angles.y = static_cast<F>(2.0) * std::atan2(y, w);
+            angles.x = std::copysign(glMath::pi<F>() * static_cast<F>(0.5), sinX);
+            angles.y = f2 * std::atan2(y, w);
             angles.z = static_cast<F>(0.0);
         } 
-        else 
+        else   
         {
             angles.x = std::asin(sinX);
-            angles.y = std::atan2(static_cast<F>(2.0) * (w * y + z * x), static_cast<F>(1.0) - static_cast<F>(2.0) * (x * x + y * y));
-            angles.z = std::atan2(static_cast<F>(2.0) * (w * z + x * y), static_cast<F>(1.0) - static_cast<F>(2.0) * (z * z + x * x));
+            angles.y = std::atan2(f2 * (w * y + z * x), f1 - f2 * (x * x + y * y));
+            angles.z = std::atan2(f2 * (w * z + x * y), f1 - f2 * (z * z + x * x));
         }
 
-        angles.x *= math::radToDeg<F>();
-        angles.y *= math::radToDeg<F>();
-        angles.z *= math::radToDeg<F>();
+        angles.x *= glMath::radToDeg<F>();
+        angles.y *= glMath::radToDeg<F>();
+        angles.z *= glMath::radToDeg<F>();
 
-        return angles;
+        return angles; 
+        */
+
+        // auto axisRotVec = [&](F r11, F r12, F r21, F r31, F r32, vec3<F> val) 
+        // {
+        //     val.x = std::atan2(r31, r32);
+        //     val.y = std::asin(r21);
+        //     val.z = std::atan2(r11, r12);
+        // };
+
+        /*
+        quat<F> q = this->getNormalizedQuat();
+
+        vec3<F> angle;
+
+        angle.x = std::atan2( 2.0 * (q.x * q.y + q.w * q.z), (q.w * q.w) - (q.x * q.x) + (q.y * q.y) - (q.z * q.z) );
+        angle.y = std::asin(-2.0 * (q.y * q.z - q.w * q.x));
+        angle.z = std::atan2(2.0 * (q.x * q.z + q.w * q.y), (q.w * q.w) - (q.x * q.x) - (q.y * q.y) + (q.z * q.z) );
+        */
+
+        // threeaxisrot( 
+        //     2*(q.x*q.z + q.w*q.y),
+        //     q.w*q.w - q.x*q.x - q.y*q.y + q.z*q.z,
+        //     -2*(q.y*q.z - q.w*q.x),
+        //     2*(q.x*q.y + q.w*q.z),
+        //     q.w*q.w - q.x*q.x + q.y*q.y - q.z*q.z,
+        //     res
+        // );
+
+        // return angle;
+
+        
+        quat<F> q = this->getNormalizedQuat();
+        vec3<F> angles;
+        /*
+        F sinp = 2.0 * (q.w * q.x - q.y * q.z);
+        if (std::abs(sinp) >= 1.0)
+            angles.x = std::copysign(glMath::pi<F>() * 0.5, sinp); 
+        else
+            angles.x = std::asin(sinp);
+
+        F siny_cosp = 2.0 * (q.w * q.y + q.x * q.z);
+        F cosy_cosp = 1.0 - 2.0 * (q.x * q.x + q.y * q.y);
+        angles.y = std::atan2(siny_cosp, cosy_cosp);
+
+        F sinr_cosp = 2.0 * (q.w * q.z + q.x * q.y);
+        F cosr_cosp = 1.0 - 2.0 * (q.x * q.x + q.z * q.z);
+        angles.z = std::atan2(sinr_cosp, cosr_cosp);
+
+        return angles * glMath::radToDeg<F>();
+        */
+
+        // 1. Calcul du sinus du Pitch
+        F sinp = 2.0 * (q.w * q.x - q.y * q.z);
+
+        // On utilise un petit seuil (epsilon) pour la précision flottante
+        if (std::abs(sinp) > 0.9999) {
+            // --- CAS DU GIMBAL LOCK ---
+            // On fixe le Pitch (90° ou -90°)
+            angles.x = std::copysign(glMath::pi<F>() * 0.5, sinp);
+
+            // Dans ce cas précis, Yaw et Roll sont liés. 
+            // On simplifie en mettant le Roll à 0 et en calculant tout sur le Yaw.
+            angles.y = std::atan2(-2.0 * (q.x * q.z - q.w * q.y), 1.0 - 2.0 * (q.y * q.y + q.z * q.z));
+            angles.z = 0.0;
+        } 
+        else {
+            // --- CAS NORMAL ---
+            angles.x = std::asin(sinp);
+            angles.y = std::atan2(2.0 * (q.w * q.y + q.x * q.z), 1.0 - 2.0 * (q.x * q.x + q.y * q.y));
+            angles.z = std::atan2(2.0 * (q.w * q.z + q.x * q.y), 1.0 - 2.0 * (q.x * q.x + q.z * q.z));
+        }
+
+        return angles * glMath::radToDeg<F>();
+        
+    }
+
+    template<FloatingNumber F>
+    inline quat<F> quat<F>::combineLocal(const quat<F>& other) const
+    {
+        return (*this * other).getNormalizedQuat();
+    }
+    template<FloatingNumber F>
+    inline quat<F> quat<F>::combineGlobal(const quat<F>& other) const
+    {
+        return (other * *this).getNormalizedQuat();
     }
 
     #pragma endregion
 
     #pragma region StaticMethods
     
+    
     template<FloatingNumber F>
-    template<Number N>
-    inline N quat<F>::length(const quat<F>& quat)  
+    inline quat<F> quat<F>::combineLocal(const quat<F>& a, const quat<F>& b)
     {
-        return static_cast<N>(std::sqrt( (quat.w * quat.w) + (quat.x * quat.x) + (quat.y * quat.y) + (quat.z * quat.z) ));
+        return (a * b).getNormalizedQuat();
+    }
+    template<FloatingNumber F>
+    inline quat<F> quat<F>::combineGlobal(const quat<F>& a, const quat<F>& b)
+    {
+        return (b * a).getNormalizedQuat();
+    }
+
+
+    template<FloatingNumber F>
+    inline F quat<F>::length(const quat<F>& quat)  
+    {
+        return std::sqrt( (quat.w * quat.w) + (quat.x * quat.x) + (quat.y * quat.y) + (quat.z * quat.z) );
     }
 
     template<FloatingNumber F>
-    template<Number N>
-    inline N quat<F>::lengthSquared(const quat<F>& quat)  
+    inline F quat<F>::lengthSquared(const quat<F>& quat)  
     {
-        return static_cast<N>( (quat.w * quat.w) + (quat.x * quat.x) + (quat.y * quat.y) + (quat.z * quat.z) );
+        return (quat.w * quat.w) + (quat.x * quat.x) + (quat.y * quat.y) + (quat.z * quat.z);
     }
 
 
     template<FloatingNumber F>
-    template<Number N>
-    inline N quat<F>::dotProduct(const quat<F>& a, const quat<F>& b)  
+    inline F quat<F>::dotProduct(const quat<F>& a, const quat<F>& b)  
     {
-        return static_cast<N>( (a.w * b.w) + (a.x * b.x) + (a.y * b.y) + (a.z * b.z) );
+        return (a.w * b.w) + (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
     }
 
     template<FloatingNumber F>
     inline quat<F> quat<F>::fromAxisAngle(const vec3<F> axis, F angle)
     {
-        vec3<F> rotAxis = axis.getUnitVector();
-        F theta = (angle * math::degToRad<F>()) / static_cast<F>(2.0);
+        vec3<F> rotAxis = axis.getNormalizedVec();
+        F theta = (angle * glMath::degToRad<F>()) / static_cast<F>(2.0);
 
         F cosTheta = static_cast<F>(std::cos(theta));
         F sinTheta = static_cast<F>(std::sin(theta));
@@ -355,21 +447,21 @@ namespace math
 
         F dot = vec3<F>::dotProduct(localForward, forward);
         
-        if (std::abs(dot + static_cast<F>(1.0)) < math::epsilon<F>())
+        if (std::abs(dot + static_cast<F>(1.0)) < glMath::epsilon<F>())
         {
             vec3<F> axis = vec3<F>::crossProduct(vec3<F>(f1, f0, f0), localForward);
         
-            if (axis.lengthSquared() < math::epsilon<F>())
+            if (axis.lengthSquared() < glMath::epsilon<F>())
             {
                 axis = vec3<F>::crossProduct(vec3<F>(f0, f1, f0), localForward);
             }
 
-            axis = axis.getUnitVector();
+            axis = axis.getNormalizedVec();
 
             return quat<F>(static_cast<F>(0.0), axis.x, axis.y, axis.z);
         }
 
-        if (std::abs(dot - static_cast<F>(1.0)) < math::epsilon<F>())
+        if (std::abs(dot - static_cast<F>(1.0)) < glMath::epsilon<F>())
         {
             return quat<F>::identity();
         }
@@ -381,7 +473,7 @@ namespace math
         F invS = static_cast<F>(1.0) / s;
 
 
-        return quat<F>(s * static_cast<F>(0.5), axis.x * invS, axis.y * invS, axis.z * invS).normalized();
+        return quat<F>(s * static_cast<F>(0.5), axis.x * invS, axis.y * invS, axis.z * invS).normalize();
     }
 
     template<FloatingNumber F>
@@ -449,14 +541,14 @@ namespace math
             qz = f025 * s;
         }
         
-        return quat<F>(qw, qx, qy, qz).normalized();
+        return quat<F>(qw, qx, qy, qz).normalize();
     }
 
 
     template<FloatingNumber F>
     inline vec3<F> quat<F>::rotatePoint(const vec3<F>& point, const quat<F>& rot)
     {
-        quat<F> q = rot.getUnitQuat();
+        quat<F> q = rot.getNormalizedQuat();
 
         vec3<F> u(q.x, q.y, q.z);
 
@@ -491,7 +583,7 @@ namespace math
 
     template<FloatingNumber F> inline quat<F> quat<F>::lerp(const quat<F>& start, const quat<F>& end, F t) 
     { 
-        t = math::clamp01(t);
+        t = glMath::clamp01(t);
         return quat<F>::lerpUnclamped(start, end, t);
     }
 
@@ -504,14 +596,14 @@ namespace math
 
     template<FloatingNumber F> inline quat<F> quat<F>::slerp(const quat<F>& start, const quat<F>& end, F t) 
     { 
-        t = math::clamp01(t);
+        t = glMath::clamp01(t);
         return quat<F>::slerpUnclamped(start, end, t);
     }
 
     template<FloatingNumber F> inline quat<F> quat<F>::slerpUnclamped(const quat<F>& start, const quat<F>& end, F t) 
     { 
-        quat<F> s = start.getUnitQuat();
-        quat<F> e = end.getUnitQuat();
+        quat<F> s = start.getNormalizedQuat();
+        quat<F> e = end.getNormalizedQuat();
 
         F dot = quat<F>::dotProduct(s, e);
 
@@ -605,22 +697,18 @@ namespace math
     template<FloatingNumber F>
     inline quat<F> operator/(const quat<F>& rot, F scalar)
     {
-        if (std::abs(scalar) > math::epsilon<F>())
-        {
-            F invScalar = static_cast<F>(1.0) / scalar;
-
-            return quat<F>(
-                rot.w * invScalar,
-                rot.x * invScalar,
-                rot.y * invScalar,
-                rot.z * invScalar
-            );
-        }
-        else 
-        {
-            return rot;
-        }
-
+        if (std::abs(scalar) < glMath::epsilon<F>()) return rot;
+        
+        
+        F invScalar = static_cast<F>(1.0) / scalar;
+        
+        return quat<F>(
+            rot.w * invScalar,
+            rot.x * invScalar,
+            rot.y * invScalar,
+            rot.z * invScalar
+        );
+        
     }
 
 
