@@ -295,7 +295,7 @@ namespace glMath
         F m10 = actualUp.x;  F m11 = actualUp.y;  F m12 = actualUp.z;
         F m20 = forward.x;   F m21 = forward.y;   F m22 = forward.z;
             
-        mat4<F> res = mat4<F>::identity;
+        mat4<F> res = mat4<F>::identity();
 
         res.columns[0][0] = right.x;    res.columns[1][0] = right.x;    res.columns[2][0] = right.x;    res.columns[3][0] = -vec3<F>::dotProduct(right, eye);
         res.columns[0][1] = actualUp.x; res.columns[1][0] = actualUp.x; res.columns[2][0] = actualUp.x; res.columns[3][0] = -vec3<F>::dotProduct(actualUp, eye);
@@ -314,7 +314,7 @@ namespace glMath
 
         F tanHalfFOV = std::tan(fovInRad * static_cast<F>(0.5));
 
-        mat4<F> res = mat4<F>::identity;
+        mat4<F> res = mat4<F>::identity();
 
         res.columns[0][0] = f1 / (aspectRatio * tanHalfFOV);
         res.columns[1][1] = f1 / tanHalfFOV;
@@ -330,7 +330,7 @@ namespace glMath
     {
         F f2 = static_cast<F>(2.0);
 
-        mat4<F> res = mat4<F>::identity;
+        mat4<F> res = mat4<F>::identity();
 
         res.columns[0][0] = f2 / (right - left);
         res.columns[1][1] = f2 / (top - bottom);
@@ -829,42 +829,49 @@ namespace glMath
     #pragma region ReferenceOperators
 
     template<FloatingNumber F>
-    inline mat4<F>& mat4<F>::operator+(const mat4<F>& other)
+    inline mat4<F>& mat4<F>::operator+=(const mat4<F>& other)
     {
-        return *this + other;
+        *this = *this + other;
+        return *this;
     }
     template<FloatingNumber F>
-    inline mat4<F>& mat4<F>::operator+(F scalar)
+    inline mat4<F>& mat4<F>::operator+=(F scalar)
     {
-        return *this + scalar;
-    }
-
-    template<FloatingNumber F>
-    inline mat4<F>& mat4<F>::operator-(const mat4<F>& other)
-    {
-        return *this - other;
-    }
-    template<FloatingNumber F>
-    inline mat4<F>& mat4<F>::operator-(F scalar)
-    {
-        return *this - scalar;
+        *this = *this + scalar;
+        return *this;
     }
 
     template<FloatingNumber F>
-    inline mat4<F>& mat4<F>::operator*(const mat4<F>& other)
+    inline mat4<F>& mat4<F>::operator-=(const mat4<F>& other)
     {
-        return *this * other;
+        *this = *this - other;
+        return *this;
     }
     template<FloatingNumber F>
-    inline mat4<F>& mat4<F>::operator*(F scalar)
+    inline mat4<F>& mat4<F>::operator-=(F scalar)
     {
-        return *this * scalar;
+        *this = *this - scalar;
+        return *this;
     }
 
     template<FloatingNumber F>
-    inline mat4<F>& mat4<F>::operator/(F scalar)
+    inline mat4<F>& mat4<F>::operator*=(const mat4<F>& other)
     {
-        return *this * scalar;
+        *this = *this * other;
+        return *this;
+    }
+    template<FloatingNumber F>
+    inline mat4<F>& mat4<F>::operator*=(F scalar)
+    {
+        *this = *this * scalar;
+        return *this;
+    }
+
+    template<FloatingNumber F>
+    inline mat4<F>& mat4<F>::operator/=(F scalar)
+    {
+        *this = *this / scalar;
+        return *this;
     }
 
     #pragma endregion

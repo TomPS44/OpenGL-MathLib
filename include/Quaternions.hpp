@@ -3,7 +3,7 @@
 #include "Math\Quaternions\Quaternion.hpp"
 #include "Math\Quaternions\DualQuaternion.hpp"
 
-using namespace glMath;
+// using namespace glMath;
 
 /// @brief shorthand for writing quat<float>
 using quatf = glMath::quat<float>;

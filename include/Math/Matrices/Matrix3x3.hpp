@@ -20,7 +20,7 @@ namespace glMath
     // ( [0][2] [1][2] [2][2] )
     //
     template<FloatingNumber F>
-    struct alignas(sizeof(F) * 4) mat3
+    struct mat3
     {
     public:
         union
@@ -88,16 +88,16 @@ namespace glMath
         mat2<F> getSubmatrix(int row, int col) const;
 
 
-        mat3& operator+(const mat3& other);
-        mat3& operator+(F scalar);
+        mat3& operator+=(const mat3& other);
+        mat3& operator+=(F scalar);
 
-        mat3& operator-(const mat3& other);
-        mat3& operator-(F scalar);
+        mat3& operator-=(const mat3& other);
+        mat3& operator-=(F scalar);
 
-        mat3& operator*(const mat3& other);
-        mat3& operator*(F scalar);
+        mat3& operator*=(const mat3& other);
+        mat3& operator*=(F scalar);
         
-        mat3& operator/(F scalar);
+        mat3& operator/=(F scalar);
     };
 
     template<FloatingNumber F>

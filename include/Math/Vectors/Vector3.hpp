@@ -56,16 +56,6 @@ namespace glMath
         template<FloatingNumber type>
         vec3<type> as() const;
 
-        vec2<F> xx() const { return vec2(x, x); };
-        vec2<F> yy() const { return vec2(y, y); };
-        vec2<F> zz() const { return vec2(z, z); };
-        vec2<F> xy() const { return vec2(x, y); };
-        vec2<F> xz() const { return vec2(x, z); };
-        vec2<F> yx() const { return vec2(y, x); };
-        vec2<F> yz() const { return vec2(y, z); };
-        vec2<F> zx() const { return vec2(z, x); };
-        vec2<F> zy() const { return vec2(z, y); };
-
         vec3 xxx() const { return vec3(x, x, x); };
         vec3 yyy() const { return vec3(y, y, y); };
         vec3 zzz() const { return vec3(z, z, z); };

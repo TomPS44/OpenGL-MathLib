@@ -90,6 +90,16 @@ namespace glMath
 
         mat3<F> toMat3() const;
         mat4<F> toMat4() const;
+
+
+        quat& operator+=(const quat& other);
+
+        quat& operator-=(const quat& other);
+
+        quat& operator*=(const quat& other);
+        quat& operator*=(F scalar);
+
+        quat& operator/=(F scalar);
     };
 
     template<FloatingNumber F>
@@ -109,6 +119,12 @@ namespace glMath
 
     template<FloatingNumber F>
     inline quat<F> operator/(const quat<F>& rot, F scalar);
+
+
+    template<FloatingNumber F>
+    bool operator==(const quat<F>& a, const quat<F>& b);
+    template<FloatingNumber F>
+    bool operator!=(const quat<F>& a, const quat<F>& b);
 }
 
 #include "Math\Quaternions\Quaternion.inl"

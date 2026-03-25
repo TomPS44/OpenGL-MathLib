@@ -4,7 +4,7 @@
 #include "Math\Vectors\Vector3.hpp"
 #include "Math\Vectors\Vector4.hpp"
 
-using namespace glMath;
+// using namespace glMath;
 
 /// @brief shorthand for writing vec2<float>
 using vec2f = glMath::vec2<float>;

@@ -31,6 +31,55 @@ namespace glMath
 
     #pragma region StaticMethods
 
+    // template<IntegralNumber I>
+    // template<FloatingNumber F>
+    // inline F iVec2<I>::distance(const iVec2<I>& vec)
+    // {
+    //     return static_cast<F>();
+    // }
+
+    template<IntegralNumber I>
+    inline I iVec2<I>::iDistance(const iVec2<I>& a, const iVec2<I>& b)
+    {
+        return std::abs(b.x - a.x) + std::abs(b.y - a.y);
+    }
+
+    template<IntegralNumber I>
+    template<FloatingNumber F>
+    inline F iVec2<I>::distance(const iVec2<I>& a, const iVec2<I>& b)
+    {
+        F ax = static_cast<F>(a.x);
+        F ay = static_cast<F>(a.y);
+        F bx = static_cast<F>(b.x);
+        F by = static_cast<F>(b.y);
+
+        if constexpr (std::is_same_v<F, float>)
+        {
+            return std::sqrtf( (bx - ax) * (bx - ax) + (by - ay) * (by - ay) );
+        }
+        else 
+        {
+            return std::sqrt( (bx - ax) * (bx - ax) + (by - ay) * (by - ay) );
+        }
+    }
+
+    template<IntegralNumber I>
+    template<FloatingNumber F>
+    inline F iVec2<I>::length(const iVec2<I>& vec) 
+    {
+        F vx = static_cast<F>(vec.x);
+        F vy = static_cast<F>(vec.y);
+
+        if constexpr (std::is_same_v<F, float>)
+        {
+            return std::sqrtf( (vx * vx) + (vy * vy) );
+        }
+        else 
+        {
+            return std::sqrt( (vx * vx) + (vy * vy) );
+        }
+    }
+
     template<IntegralNumber I>
     inline I iVec2<I>::lengthSquared(const iVec2<I>& vec) 
     {
@@ -77,19 +126,80 @@ namespace glMath
     template<FloatingNumber F>
     inline iVec2<I> iVec2<I>::floor(const vec2<F>& fVec)
     {
-        return iVec2<I>(std::floor(fVec.x), std::floor(fVec.y));
+        double min = static_cast<double>(std::numeric_limits<I>::min());
+        double max = static_cast<double>(std::numeric_limits<I>::max());
+
+        if constexpr (std::is_same_v<F, float>)
+        {
+            vec2<double> preciseVec = vec2<double>(static_cast<double>(fVec.x), static_cast<double>(fVec.y));
+
+            return iVec2<I>(
+                static_cast<I>(std::clamp(std::floor(preciseVec.x), min, max)),
+                static_cast<I>(std::clamp(std::floor(preciseVec.y), min, max))
+            );
+        }
+        else
+        {
+            return iVec2<I>(
+                static_cast<I>(std::clamp(std::floor(fVec.x), min, max)),
+                static_cast<I>(std::clamp(std::floor(fVec.y), min, max))
+            );
+        }
+
+
+        // return iVec2<I>(std::floor(fVec.x), std::floor(fVec.y));
     }
     template<IntegralNumber I>
     template<FloatingNumber F>
     inline iVec2<I> iVec2<I>::ceil(const vec2<F>& fVec)
     {
-        return iVec2<I>(std::ceil(fVec.x), std::ceil(fVec.y));
+        double min = static_cast<double>(std::numeric_limits<I>::min());
+        double max = static_cast<double>(std::numeric_limits<I>::max());
+
+        if constexpr (std::is_same_v<F, float>)
+        {
+            vec2<double> preciseVec = vec2<double>(static_cast<double>(fVec.x), static_cast<double>(fVec.y));
+
+            return iVec2<I>(
+                static_cast<I>(std::clamp(std::ceil(preciseVec.x), min, max)),
+                static_cast<I>(std::clamp(std::ceil(preciseVec.y), min, max))
+            );
+        }
+        else
+        {
+            return iVec2<I>(
+                static_cast<I>(std::clamp(std::ceil(fVec.x), min, max)),
+                static_cast<I>(std::clamp(std::ceil(fVec.y), min, max))
+            );
+        }
+
+        // return iVec2<I>(std::ceil(fVec.x), std::ceil(fVec.y));
     }
     template<IntegralNumber I>
     template<FloatingNumber F>
     inline iVec2<I> iVec2<I>::round(const vec2<F>& fVec)
     {
-        return iVec2<I>(std::round(fVec.x), std::round(fVec.y));
+        double min = static_cast<double>(std::numeric_limits<I>::min());
+        double max = static_cast<double>(std::numeric_limits<I>::max());
+
+        if constexpr (std::is_same_v<F, float>)
+        {
+            vec2<double> preciseVec = vec2<double>(static_cast<double>(fVec.x), static_cast<double>(fVec.y));
+
+            return iVec2<I>(
+                static_cast<I>(std::clamp(std::round(preciseVec.x), min, max)),
+                static_cast<I>(std::clamp(std::round(preciseVec.y), min, max))
+            );
+        }
+        else
+        {
+            return iVec2<I>(
+                static_cast<I>(std::clamp(std::round(fVec.x), min, max)),
+                static_cast<I>(std::clamp(std::round(fVec.y), min, max))
+            );
+        }
+
+        // return iVec2<I>(std::round(fVec.x), std::round(fVec.y));
     }
 
     #pragma endregion
@@ -98,17 +208,70 @@ namespace glMath
     #pragma region MemberMethods
 
 
+
+    template<IntegralNumber I>
+    inline I iVec2<I>::iDistance(const iVec2<I>& other) const
+    {
+        return std::abs(other.x - x) + std::abs(other.y - y);
+    }
+
+    template<IntegralNumber I>
+    template<FloatingNumber F>
+    inline F iVec2<I>::distance(const iVec2<I>& other) const
+    {
+        F ax = static_cast<F>(x);
+        F ay = static_cast<F>(y);
+        F bx = static_cast<F>(other.x);
+        F by = static_cast<F>(other.y);
+
+        if constexpr (std::is_same_v<F, float>)
+        {
+            return std::sqrtf( (bx - ax) * (bx - ax) + (by - ay) * (by - ay) );
+        }
+        else 
+        {
+            return std::sqrt( (bx - ax) * (bx - ax) + (by - ay) * (by - ay) );
+        }
+    }
+
+    template<IntegralNumber I>
+    template<FloatingNumber F>
+    inline F iVec2<I>::length() const
+    {
+        F vx = static_cast<F>(x);
+        F vy = static_cast<F>(y);
+
+        if constexpr (std::is_same_v<F, float>)
+        {
+            return std::sqrtf( (vx * vx) + (vy * vy) );
+        }
+        else 
+        {
+            return std::sqrt( (vx * vx) + (vy * vy) );
+        }
+    }
+
+
     template<IntegralNumber I>
     template<IntegralNumber i>
     inline iVec2<i> iVec2<I>::as() const
     {
-        std::numeric_limits<i> limit = std::numeric_limits<i>();
-        I minLimit = static_cast<I>(limit.lowest());
-        I maxLimit = static_cast<I>(limit.max());
+        // std::numeric_limits<i> limit = std::numeric_limits<i>();
+        I minLimit = static_cast<I>(std::numeric_limits<i>::lowest());
+        I maxLimit = static_cast<I>(std::numeric_limits<i>::max());
 
         return iVec2<i>(
             static_cast<i>(std::clamp(x, minLimit, maxLimit)),
             static_cast<i>(std::clamp(y, minLimit, maxLimit))
+        );
+    }
+    template<IntegralNumber I>
+    template<FloatingNumber F>
+    inline vec2<F> iVec2<I>::to() const
+    {
+        return vec2<F>(
+            static_cast<F>(x),
+            static_cast<F>(y)
         );
     }
 
@@ -261,13 +424,6 @@ namespace glMath
     #pragma endregion
 
     #pragma region Operators
-
-    template<IntegralNumber I>
-    inline I& iVec2<I>::operator[](I index) 
-    {
-        return data[index];
-    }
-
 
     template<IntegralNumber I>
     inline iVec2<I> iVec2<I>::operator-() const

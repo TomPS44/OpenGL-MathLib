@@ -59,16 +59,16 @@ namespace glMath
         F at(int row, int col) const; 
         
         
-        mat2& operator+(const mat2& other);
-        mat2& operator+(F scalar);
+        mat2& operator+=(const mat2& other);
+        mat2& operator+=(F scalar);
 
-        mat2& operator-(const mat2& other);
-        mat2& operator-(F scalar);
+        mat2& operator-=(const mat2& other);
+        mat2& operator-=(F scalar);
 
-        mat2& operator*(const mat2& other);
-        mat2& operator*(F scalar);
+        mat2& operator*=(const mat2& other);
+        mat2& operator*=(F scalar);
 
-        mat2& operator/(F scalar);
+        mat2& operator/=(F scalar);
     };
 
     template<FloatingNumber F>

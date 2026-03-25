@@ -291,19 +291,60 @@ namespace glMath
     #pragma endregion
 
 
+    #pragma region ReferenceOperators
+
+    template<FloatingNumber F>
+    inline dualQuat<F>& dualQuat<F>::operator+=(const dualQuat<F>& other)
+    {
+        *this = *this + other;
+        return *this;
+    }
+
+    template<FloatingNumber F>
+    inline dualQuat<F>& dualQuat<F>::operator-=(const dualQuat<F>& other)
+    {
+        *this = *this - other;
+        return *this;
+    }
+
+
+    template<FloatingNumber F>
+    inline dualQuat<F>& dualQuat<F>::operator*=(const dualQuat<F>& other)
+    {
+        *this = *this * other;
+        return *this;
+    }
+    template<FloatingNumber F>
+    inline dualQuat<F>& dualQuat<F>::operator*=(F scalar)
+    {
+        *this = *this * scalar;
+        return *this;
+    }
+
+    template<FloatingNumber F>
+    inline dualQuat<F>& dualQuat<F>::operator/=(F scalar)
+    {
+        *this = *this / scalar;
+        return *this;
+    }
+
+    #pragma endregion
+
+    #pragma region Operators
+    
     template <FloatingNumber F>
-    dualQuat<F> operator*(const dualQuat<F>& a, const dualQuat<F>& b)
+    inline dualQuat<F> operator*(const dualQuat<F>& a, const dualQuat<F>& b)
     {
         dualQuat<F> res;
 
         res.real = a.real * b.real;
         res.dual = a.real * b.dual + a.dual * b.real;
-
+        
         return res;
     }
 
     template <FloatingNumber F>
-    dualQuat<F> operator+(const dualQuat<F>& a, const dualQuat<F>& b)
+    inline dualQuat<F> operator+(const dualQuat<F>& a, const dualQuat<F>& b)
     {
         dualQuat<F> res;
 
@@ -314,7 +355,7 @@ namespace glMath
     }
 
     template <FloatingNumber F>
-    dualQuat<F> operator*(const dualQuat<F>& dQuat, F scalar)
+    inline dualQuat<F> operator*(const dualQuat<F>& dQuat, F scalar)
     {
         dualQuat<F> res = dQuat;
 
@@ -325,13 +366,35 @@ namespace glMath
     }
 
     template <FloatingNumber F>
-    dualQuat<F> operator*(F scalar, const dualQuat<F>& dQuat)
+    inline dualQuat<F> operator*(F scalar, const dualQuat<F>& dQuat)
     {
         dualQuat<F> res = dQuat;
 
         res.real = res.real * scalar;
         res.dual = res.dual * scalar;
-
+        
         return res;
     }
+
+
+    template<FloatingNumber F>
+    inline bool operator==(const dualQuat<F>& a, const dualQuat<F>& b)
+    {
+        return std::abs(a.real.w - b.real.w) < glMath::epsilon<F>() && 
+               std::abs(a.real.x - b.real.x) < glMath::epsilon<F>() && 
+               std::abs(a.real.y - b.real.y) < glMath::epsilon<F>() &&
+               std::abs(a.real.z - b.real.z) < glMath::epsilon<F>() &&
+
+               std::abs(a.dual.w - b.dual.w) < glMath::epsilon<F>() && 
+               std::abs(a.dual.x - b.dual.x) < glMath::epsilon<F>() && 
+               std::abs(a.dual.y - b.dual.y) < glMath::epsilon<F>() &&
+               std::abs(a.dual.z - b.dual.z) < glMath::epsilon<F>();
+    }
+    template<FloatingNumber F>
+    inline bool operator!=(const dualQuat<F>& a, const dualQuat<F>& b)
+    {
+        return !(a == b);
+    }
+
+    #pragma endregion
 }

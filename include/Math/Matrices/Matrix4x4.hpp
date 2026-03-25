@@ -82,11 +82,11 @@ namespace glMath
 
         /// @brief A function to generate a perspective matrix
         /// @param fovInRad The Field Of View of the camera, IN RADIANS
-        /// @param aspectRation The aspect ratio of the window
+        /// @param aspectRatio The aspect ratio of the window
         /// @param near The near clipping plane
         /// @param far The far clipping plane
         /// @return Return a new 4X4 matrix of the same type
-        static mat4 perspective(F fovInRad, F aspectRation, F near, F far);
+        static mat4 perspective(F fovInRad, F aspectRatio, F near, F far);
 
         /// @brief A function to generate an orthographic matrix
         /// @param left The left clipping plpane
@@ -183,16 +183,16 @@ namespace glMath
         const F at(int row, int col) const;   
         
         
-        mat4& operator+(const mat4& other);
-        mat4& operator+(F scalar);
+        mat4& operator+=(const mat4& other);
+        mat4& operator+=(F scalar);
 
-        mat4& operator-(const mat4& other);
-        mat4& operator-(F scalar);
-
-        mat4& operator*(const mat4& other);
-        mat4& operator*(F scalar);
+        mat4& operator-=(const mat4& other);
+        mat4& operator-=(F scalar);
         
-        mat4& operator/(F scalar);
+        mat4& operator*=(const mat4& other);
+        mat4& operator*=(F scalar);
+    
+        mat4& operator/=(F scalar);
     };
 
     template<FloatingNumber F>

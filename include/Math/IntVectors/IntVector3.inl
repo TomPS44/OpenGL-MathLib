@@ -8,16 +8,20 @@ namespace glMath
 {
     #pragma region Constructors
 
-    inline intVec3::intVec3()
-        : x(0), y(0), z(0)
+    template<IntegralNumber I>
+    inline iVec3<I>::iVec3()
+        : x(static_cast<I>(0)), y(static_cast<I>(0)), z(static_cast<I>(0))
     {}
-    inline intVec3::intVec3(int scalar)
+    template<IntegralNumber I>    
+    inline iVec3<I>::iVec3(I scalar)
         : x(scalar), y(scalar), z(scalar)
     {}
-    inline intVec3::intVec3(int vx, int vy, int vz)
+    template<IntegralNumber I>    
+    inline iVec3<I>::iVec3(I vx, I vy, I vz)
         : x(vx), y(vy), z(vz)
     {}
-    inline intVec3::intVec3(const intVec3& vec)
+    template<IntegralNumber I>    
+    inline iVec3<I>::iVec3(const iVec3<I>& vec)
         : x(vec.x), y(vec.y), z(vec.z)
     {}
 
@@ -26,65 +30,191 @@ namespace glMath
     
     #pragma region StaticMethods
 
-    inline int intVec3::lengthSquared(const intVec3& vec) 
+
+    template<IntegralNumber I>
+    inline I iVec3<I>::iDistance(const iVec3<I>& a, const iVec3<I>& b) 
+    {
+        return std::abs(b.x - a.x) + std::abs(b.y - a.y) + std::abs(b.z - a.z);
+    }
+
+    template<IntegralNumber I>
+    template<FloatingNumber F>
+    inline F iVec3<I>::distance(const iVec3<I>& a, const iVec3<I>& b) 
+    {
+        F ax = static_cast<F>(a.x);
+        F ay = static_cast<F>(a.y);
+        F az = static_cast<F>(a.y);
+        F bx = static_cast<F>(b.x);
+        F by = static_cast<F>(b.y);
+        F bz = static_cast<F>(b.y);
+
+        if constexpr (std::is_same_v<F, float>)
+        {
+            return std::sqrtf( (bx - ax) * (bx - ax) + (by - ay) * (by - ay) * (bz - az) * (bz - az) );
+        }
+        else 
+        {
+            return std::sqrt( (bx - ax) * (bx - ax) + (by - ay) * (by - ay) * (bz - az) * (bz - az) );
+        }
+    }
+
+    template<IntegralNumber I>
+    template<FloatingNumber F>
+    inline F iVec3<I>::length(const iVec3<I>& vec) 
+    {
+        F vx = static_cast<F>(vec.x);
+        F vy = static_cast<F>(vec.y);
+        F vz = static_cast<F>(vec.z);
+
+        if constexpr (std::is_same_v<F, float>)
+        {
+            return std::sqrtf( (vx * vx) + (vy * vy) + (vz * vz) );
+        }
+        else 
+        {
+            return std::sqrt( (vx * vx) + (vy * vy) + (vz * vz) );
+        }
+    }
+
+    template<IntegralNumber I>
+    inline I iVec3<I>::lengthSquared(const iVec3<I>& vec) 
     {
         return (vec.x * vec.x) + (vec.y * vec.y) + (vec.z * vec.z);
     }
 
-    inline int intVec3::distanceSquared(const intVec3& a, const intVec3& b) 
+    template<IntegralNumber I>
+    inline I iVec3<I>::distanceSquared(const iVec3<I>& a, const iVec3<I>& b) 
     {
         return (b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y) + (b.z - a.z) * (b.z - a.z);
     }
 
-    inline int intVec3::dotProduct(const intVec3& a, const intVec3& b)
+    template<IntegralNumber I>
+    inline I iVec3<I>::dotProduct(const iVec3<I>& a, const iVec3<I>& b)
     {
         return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
     }
 
-    inline intVec3 intVec3::crossProduct(const intVec3& a, const intVec3& b)
+    template<IntegralNumber I>
+    inline iVec3<I> iVec3<I>::crossProduct(const iVec3<I>& a, const iVec3<I>& b)
     {
-        int vx = a.y * b.z - a.z * b.y;
-        int vy = a.z * b.x - a.x * b.z;
-        int vz = a.x * b.y - a.y * b.x;
+        I vx = a.y * b.z - a.z * b.y;
+        I vy = a.z * b.x - a.x * b.z;
+        I vz = a.x * b.y - a.y * b.x;
 
-        return intVec3(vx, vy, vz);
+        return iVec3<I>(vx, vy, vz);
     }
 
 
-    inline intVec3 intVec3::clamp(const intVec3& vec, int minInclusive, int maxInclusive)
+    template<IntegralNumber I>
+    inline iVec3<I> iVec3<I>::clamp(const iVec3<I>& vec, I minInclusive, I maxInclusive)
     {
         return vec.getClampedVec(minInclusive, maxInclusive);
     }
 
-    inline intVec3 intVec3::abs(const intVec3& vec)
+    template<IntegralNumber I>
+    inline iVec3<I> iVec3<I>::abs(const iVec3<I>& vec)
     {
         return vec.getAbsValueVec();
     }
 
-    inline intVec3 intVec3::min(const intVec3& a, const intVec3& b)
+    template<IntegralNumber I>
+    inline iVec3<I> iVec3<I>::min(const iVec3<I>& a, const iVec3<I>& b)
     {
-        return intVec3(glMath::min(a.x, b.x), glMath::min(a.y, b.y), glMath::min(a.z, b.z));
+        return iVec3<I>(glMath::min(a.x, b.x), glMath::min(a.y, b.y), glMath::min(a.z, b.z));
     }
-    inline intVec3 intVec3::max(const intVec3& a, const intVec3& b)
+    template<IntegralNumber I>
+    inline iVec3<I> iVec3<I>::max(const iVec3<I>& a, const iVec3<I>& b)
     {
-        return intVec3(glMath::max(a.x, b.x), glMath::max(a.y, b.y), glMath::max(a.z, b.z));
+        return iVec3<I>(glMath::max(a.x, b.x), glMath::max(a.y, b.y), glMath::max(a.z, b.z));
     }
 
 
+    template<IntegralNumber I>
     template<FloatingNumber F>
-    inline intVec3 intVec3::floor(const vec3<F>& fVec)
+    inline iVec3<I> iVec3<I>::floor(const vec3<F>& fVec)
     {
-        return intVec3(std::floor(fVec.x), std::floor(fVec.y), std::floor(fVec.z));
+        double min = static_cast<double>(std::numeric_limits<I>::min());
+        double max = static_cast<double>(std::numeric_limits<I>::max());
+
+        if constexpr (std::is_same_v<F, float>)
+        {
+            vec3<double> preciseVec = vec3<double>(static_cast<double>(fVec.x), static_cast<double>(fVec.y));
+
+            return iVec3<I>(
+                static_cast<I>(std::clamp(std::floor(preciseVec.x), min, max)),
+                static_cast<I>(std::clamp(std::floor(preciseVec.y), min, max)),
+                static_cast<I>(std::clamp(std::floor(preciseVec.z), min, max))
+            );
+        }
+        else
+        {
+            return iVec3<I>(
+                static_cast<I>(std::clamp(std::floor(fVec.x), min, max)),
+                static_cast<I>(std::clamp(std::floor(fVec.y), min, max)),
+                static_cast<I>(std::clamp(std::floor(fVec.z), min, max))
+            );
+        }
+
+
+        // return iVec2<I>(std::floor(fVec.x), std::floor(fVec.y));
     }
+    template<IntegralNumber I>
     template<FloatingNumber F>
-    inline intVec3 intVec3::round(const vec3<F>& fVec)
+    inline iVec3<I> iVec3<I>::ceil(const vec3<F>& fVec)
     {
-        return intVec3(std::round(fVec.x), std::round(fVec.y), std::round(fVec.z));
+        double min = static_cast<double>(std::numeric_limits<I>::min());
+        double max = static_cast<double>(std::numeric_limits<I>::max());
+
+        if constexpr (std::is_same_v<F, float>)
+        {
+            vec3<double> preciseVec = vec3<double>(static_cast<double>(fVec.x), static_cast<double>(fVec.y));
+
+            return iVec3<I>(
+                static_cast<I>(std::clamp(std::ceil(preciseVec.x), min, max)),
+                static_cast<I>(std::clamp(std::ceil(preciseVec.y), min, max)),
+                static_cast<I>(std::clamp(std::ceil(preciseVec.z), min, max))
+            );
+        }
+        else
+        {
+            return iVec3<I>(
+                static_cast<I>(std::clamp(std::ceil(fVec.x), min, max)),
+                static_cast<I>(std::clamp(std::ceil(fVec.y), min, max)),
+                static_cast<I>(std::clamp(std::ceil(fVec.z), min, max))
+            );
+        }
+
+
+        // return iVec2<I>(std::floor(fVec.x), std::floor(fVec.y));
     }
+    template<IntegralNumber I>
     template<FloatingNumber F>
-    inline intVec3 intVec3::toInt(const vec3<F>& fVec)
+    inline iVec3<I> iVec3<I>::round(const vec3<F>& fVec)
     {
-        return intVec3(static_cast<int>(fVec.x), static_cast<int>(fVec.y), static_cast<int>(fVec.z));
+        double min = static_cast<double>(std::numeric_limits<I>::min());
+        double max = static_cast<double>(std::numeric_limits<I>::max());
+
+        if constexpr (std::is_same_v<F, float>)
+        {
+            vec3<double> preciseVec = vec3<double>(static_cast<double>(fVec.x), static_cast<double>(fVec.y));
+
+            return iVec3<I>(
+                static_cast<I>(std::clamp(std::round(preciseVec.x), min, max)),
+                static_cast<I>(std::clamp(std::round(preciseVec.y), min, max)),
+                static_cast<I>(std::clamp(std::round(preciseVec.z), min, max))
+            );
+        }
+        else
+        {
+            return iVec3<I>(
+                static_cast<I>(std::clamp(std::round(fVec.x), min, max)),
+                static_cast<I>(std::clamp(std::round(fVec.y), min, max)),
+                static_cast<I>(std::clamp(std::round(fVec.z), min, max))
+            );
+        }
+
+
+        // return iVec2<I>(std::floor(fVec.x), std::floor(fVec.y));
     }
 
     #pragma endregion
@@ -92,55 +222,116 @@ namespace glMath
 
     #pragma region MemberMethods
 
-    // template<IntegraNumber I>
-    // template<IntegralNumber i>
-    // inline intVec3<i> intVec3<I>::as() const
-    // {
-    //     std::numeric_limits<i> limit = std::numeric_limits<i>();
-    //     I minLimit = static_cast<I>(limit.lowest());
-    //     I maxLimit = static_cast<I>(limit.max());
+
+    template<IntegralNumber I>
+    inline I iVec3<I>::iDistance(const iVec3<I>& other) const
+    {
+        return std::abs(other.x - x) + std::abs(other.y - y) + std::abs(other.z - z);
+    }
+
+    template<IntegralNumber I>
+    template<FloatingNumber F>
+    inline F iVec3<I>::distance(const iVec3<I>& other) const
+    {
+        F ax = static_cast<F>(x);
+        F ay = static_cast<F>(y);
+        F az = static_cast<F>(y);
+        F bx = static_cast<F>(other.x);
+        F by = static_cast<F>(other.y);
+        F bz = static_cast<F>(other.y);
+
+        if constexpr (std::is_same_v<F, float>)
+        {
+            return std::sqrtf( (bx - ax) * (bx - ax) + (by - ay) * (by - ay) * (bz - az) * (bz - az) );
+        }
+        else 
+        {
+            return std::sqrt( (bx - ax) * (bx - ax) + (by - ay) * (by - ay) * (bz - az) * (bz - az) );
+        }
+    }
+
+    template<IntegralNumber I>
+    template<FloatingNumber F>
+    inline F iVec3<I>::length() const
+    {
+        F vx = static_cast<F>(x);
+        F vy = static_cast<F>(y);
+        F vz = static_cast<F>(z);
+
+        if constexpr (std::is_same_v<F, float>)
+        {
+            return std::sqrtf( (vx * vx) + (vy * vy) + (vz * vz) );
+        }
+        else 
+        {
+            return std::sqrt( (vx * vx) + (vy * vy) + (vz * vz) );
+        }
+    }
+
+    template<IntegralNumber I>
+    template<IntegralNumber i>
+    inline iVec3<i> iVec3<I>::as() const
+    {
+        std::numeric_limits<i> limit = std::numeric_limits<i>();
+        I minLimit = static_cast<I>(limit.lowest());
+        I maxLimit = static_cast<I>(limit.max());
     
-    //     return iVec2<i>(
-    //         static_cast<i>(std::clamp(x, minLimit, maxLimit)),
-    //         static_cast<i>(std::clamp(y, minLimit, maxLimit)),
-    //         static_cast<i>(std::clamp(z, minLimit, maxLimit))
-    //     );
-    // }
+        return iVec3<i>(
+            static_cast<i>(std::clamp(x, minLimit, maxLimit)),
+            static_cast<i>(std::clamp(y, minLimit, maxLimit)),
+            static_cast<i>(std::clamp(z, minLimit, maxLimit))
+        );
+    }
+    template<IntegralNumber I>
+    template<FloatingNumber F>
+    inline vec3<F> iVec3<I>::to() const
+    {
+        return vec3<F>(
+            static_cast<F>(x),
+            static_cast<F>(y),
+            static_cast<F>(z)
+        );
+    }
 
 
-
-    inline const int* intVec3::valuePtr() const
+    template<IntegralNumber I>
+    inline const I* iVec3<I>::valuePtr() const
     {
         return &x;
     }
 
 
-    inline int intVec3::lengthSquared() const
+    template<IntegralNumber I>
+    inline I iVec3<I>::lengthSquared() const
     {
         return (x * x) + (y * y) + (z * z);
     }
 
-    inline int intVec3::distanceSquared(const intVec3& other) const
+    template<IntegralNumber I>
+    inline I iVec3<I>::distanceSquared(const iVec3<I>& other) const
     {
         return (other.x - x) * (other.x - x) + (other.y - y) * (other.y - y) + (other.z - z) * (other.z - z);
     }
 
-    inline int intVec3::dotProduct(const intVec3& other) const
+    template<IntegralNumber I>
+    inline I iVec3<I>::dotProduct(const iVec3<I>& other) const
     {
         return (x * other.x) + (y * other.y) + (z * other.z);
     }
 
-    inline intVec3 intVec3::crossProduct(const intVec3& other) const
+    template<IntegralNumber I>
+    inline iVec3<I> iVec3<I>::crossProduct(const iVec3<I>& other) const
     {
-        int vx = y * other.z - z * other.y;
-        int vy = z * other.x - x * other.z;
-        int vz = x * other.y - y * other.x;
+        I vx = y * other.z - z * other.y;
+        I vy = z * other.x - x * other.z;
+        I vz = x * other.y - y * other.x;
 
-        return intVec3(vx, vy, vz);
+        return iVec3<I>(vx, vy, vz);
     }
 
 
-    inline intVec3& intVec3::clamp(int minInclusive, int maxInclusive)
+    template<IntegralNumber I>
+    inline iVec3<I>& iVec3<I>::clamp(I minInclusive, I maxInclusive)
     {
         x = glMath::clamp(x, minInclusive, maxInclusive);
         y = glMath::clamp(y, minInclusive, maxInclusive);
@@ -148,14 +339,16 @@ namespace glMath
 
         return *this;
     }
-    inline intVec3 intVec3::getClampedVec(int minInclusive, int maxInclusive) const
+    template<IntegralNumber I>
+    inline iVec3<I> iVec3<I>::getClampedVec(I minInclusive, I maxInclusive) const
     {
-        intVec3 copy = *this;
+        iVec3<I> copy = *this;
 
         return copy.clamp(minInclusive, maxInclusive);
     }
 
-    inline intVec3& intVec3::absValue()
+    template<IntegralNumber I>
+    inline iVec3<I>& iVec3<I>::absValue()
     {
         x = std::abs(x);
         y = std::abs(y);
@@ -163,20 +356,24 @@ namespace glMath
 
         return *this;
     }
-    inline intVec3 intVec3::getAbsValueVec() const
+        
+    template<IntegralNumber I>
+    inline iVec3<I> iVec3<I>::getAbsValueVec() const
     {
-        intVec3 copy = *this;
+        iVec3<I> copy = *this;
 
         return copy.absValue();
     }
 
-    inline intVec3 intVec3::min(const intVec3& other) const
+    template<IntegralNumber I>
+    inline iVec3<I> iVec3<I>::min(const iVec3<I>& other) const
     {
-        return intVec3(glMath::min(x, other.x), glMath::min(y, other.y), glMath::min(z, other.z));
+        return iVec3<I>(glMath::min(x, other.x), glMath::min(y, other.y), glMath::min(z, other.z));
     }
-    inline intVec3 intVec3::max(const intVec3& other) const
+    template<IntegralNumber I>
+    inline iVec3<I> iVec3<I>::max(const iVec3<I>& other) const
     {
-        return intVec3(glMath::max(x, other.x), glMath::max(y, other.y), glMath::max(z, other.z));
+        return iVec3<I>(glMath::max(x, other.x), glMath::max(y, other.y), glMath::max(z, other.z));
     }
 
     #pragma endregion
@@ -184,7 +381,8 @@ namespace glMath
 
     #pragma region ReferenceOperators
 
-    inline intVec3& intVec3::operator+=(const intVec3& vec)
+    template<IntegralNumber I>
+    inline iVec3<I>& iVec3<I>::operator+=(const iVec3<I>& vec)
     {
         x += vec.x;
         y += vec.y;
@@ -192,7 +390,8 @@ namespace glMath
 
         return *this;
     }
-    inline intVec3& intVec3::operator+=(int scalar)
+    template<IntegralNumber I>
+    inline iVec3<I>& iVec3<I>::operator+=(I scalar)
     {
         x += scalar;
         y += scalar;
@@ -201,7 +400,8 @@ namespace glMath
         return *this;
     }
 
-    inline intVec3& intVec3::operator-=(const intVec3& vec)
+    template<IntegralNumber I>
+    inline iVec3<I>& iVec3<I>::operator-=(const iVec3<I>& vec)
     {
         x -= vec.x;
         y -= vec.y;
@@ -209,7 +409,8 @@ namespace glMath
 
         return *this;
     }
-    inline intVec3& intVec3::operator-=(int scalar)
+    template<IntegralNumber I>
+    inline iVec3<I>& iVec3<I>::operator-=(I scalar)
     {
         x -= scalar;
         y -= scalar;
@@ -218,7 +419,8 @@ namespace glMath
         return *this;
     }
 
-    inline intVec3& intVec3::operator*=(const intVec3& vec)
+    template<IntegralNumber I>
+    inline iVec3<I>& iVec3<I>::operator*=(const iVec3<I>& vec)
     {
         x *= vec.x;
         y *= vec.y;
@@ -226,7 +428,8 @@ namespace glMath
 
         return *this;
     }
-    inline intVec3& intVec3::operator*=(int scalar)
+    template<IntegralNumber I>
+    inline iVec3<I>& iVec3<I>::operator*=(I scalar)
     {
         x *= scalar;
         y *= scalar;
@@ -235,7 +438,8 @@ namespace glMath
         return *this;
     }
 
-    inline intVec3& intVec3::operator/=(int scalar)
+    template<IntegralNumber I>
+    inline iVec3<I>& iVec3<I>::operator/=(I scalar)
     {
         if (scalar != 0)
         {
@@ -247,7 +451,8 @@ namespace glMath
         return *this;
     }
 
-    inline intVec3& intVec3::operator%=(int scalar)
+    template<IntegralNumber I>
+    inline iVec3<I>& iVec3<I>::operator%=(I scalar)
     {
         x %= scalar;
         y %= scalar;
@@ -260,93 +465,103 @@ namespace glMath
 
     #pragma region Operators
 
-    inline int& intVec3::operator[](int index) 
+    template<IntegralNumber I>
+    inline iVec3<I> iVec3<I>::operator-() const
     {
-        return data[index];
+        return iVec3<I>(-x, -y, -z);
     }
 
 
-    inline intVec3 intVec3::operator-() const
+    template<IntegralNumber I>
+    inline iVec3<I> operator+(const iVec3<I>& a, const iVec3<I>& b)
     {
-        return intVec3(-x, -y, -z);
+        return iVec3<I>(a.x + b.x, a.y + b.y, a.z + b.z);
+    }
+    template<IntegralNumber I>
+    inline iVec3<I> operator+(const iVec3<I>& a, I scalar)
+    {
+        return iVec3<I>(a.x + scalar, a.y + scalar, a.z + scalar);
     }
 
-
-    inline intVec3 operator+(const intVec3& a, const intVec3& b)
+    template<IntegralNumber I>
+    inline iVec3<I> operator-(const iVec3<I>& a, const iVec3<I>& b)
     {
-        return intVec3(a.x + b.x, a.y + b.y, a.z + b.z);
+        return iVec3<I>(a.x - b.x, a.y - b.y, a.z - b.z);
     }
-    inline intVec3 operator+(const intVec3& a, int scalar)
+    template<IntegralNumber I>
+    inline iVec3<I> operator-(const iVec3<I>& a, I scalar)
     {
-        return intVec3(a.x + scalar, a.y + scalar, a.z + scalar);
-    }
-
-    inline intVec3 operator-(const intVec3& a, const intVec3& b)
-    {
-        return intVec3(a.x - b.x, a.y - b.y, a.z - b.z);
-    }
-    inline intVec3 operator-(const intVec3& a, int scalar)
-    {
-        return intVec3(a.x - scalar, a.y - scalar, a.z - scalar);
+        return iVec3<I>(a.x - scalar, a.y - scalar, a.z - scalar);
     }
 
-    inline intVec3 operator*(const intVec3& a, const intVec3& b)
+    template<IntegralNumber I>
+    inline iVec3<I> operator*(const iVec3<I>& a, const iVec3<I>& b)
     {
-        return intVec3(a.x * b.x, a.y * b.y, a.z * b.z);
+        return iVec3<I>(a.x * b.x, a.y * b.y, a.z * b.z);
     }
-    inline intVec3 operator*(const intVec3& a, int scalar)
+    template<IntegralNumber I>
+    inline iVec3<I> operator*(const iVec3<I>& a, I scalar)
     {
-        return intVec3(a.x * scalar, a.y * scalar, a.z * scalar);
+        return iVec3<I>(a.x * scalar, a.y * scalar, a.z * scalar);
     }
-    inline intVec3 operator*(int scalar, const intVec3& a)
+    template<IntegralNumber I>
+    inline iVec3<I> operator*(I scalar, const iVec3<I>& a)
     {
-        return intVec3(a.x * scalar, a.y * scalar, a.z * scalar);
+        return iVec3<I>(a.x * scalar, a.y * scalar, a.z * scalar);
     }
 
-    inline intVec3 operator/(const intVec3& vec, int scalar)
+    template<IntegralNumber I>
+    inline iVec3<I> operator/(const iVec3<I>& vec, I scalar)
     {
         if (scalar == 0) return vec;
 
-        return intVec3(vec.x / scalar, vec.y / scalar, vec.z / scalar);
+        return iVec3<I>(vec.x / scalar, vec.y / scalar, vec.z / scalar);
     }
 
-    inline intVec3 operator%(const intVec3& vec, int scalar)
+    template<IntegralNumber I>
+    inline iVec3<I> operator%(const iVec3<I>& vec, I scalar)
     {
-        return intVec3(vec.x % scalar, vec.y % scalar, vec.z % scalar);
+        return iVec3<I>(vec.x % scalar, vec.y % scalar, vec.z % scalar);
     }
 
 
-    inline bool operator==(const intVec3& a, const intVec3& b)
+    template<IntegralNumber I>
+    inline bool operator==(const iVec3<I>& a, const iVec3<I>& b)
     {
         return a.x == b.x &&
                a.y == b.y &&
                a.z == b.z;
     }
-    inline bool operator!=(const intVec3& a, const intVec3& b)
+    template<IntegralNumber I>
+    inline bool operator!=(const iVec3<I>& a, const iVec3<I>& b)
     {
         return !(a == b);
     }
 
-    inline bool operator<(const intVec3& a, const intVec3& b)
+    template<IntegralNumber I>
+    inline bool operator<(const iVec3<I>& a, const iVec3<I>& b)
     {
         if (a.x != b.x) return a.x < b.x;
         if (a.y != b.y) return a.y < b.y;
         return a.z < b.z;
     }
-    inline bool operator>(const intVec3& a, const intVec3& b)
+    template<IntegralNumber I>
+    inline bool operator>(const iVec3<I>& a, const iVec3<I>& b)
     {
         if (a.x != b.x) return a.x > b.x;
         if (a.y != b.y) return a.y > b.y;
         return a.z > b.z;
     }
 
-    inline bool operator<=(const intVec3& a, const intVec3& b)
+    template<IntegralNumber I>
+    inline bool operator<=(const iVec3<I>& a, const iVec3<I>& b)
     {
         if (a.x != b.x) return a.x <= b.x;
         if (a.y != b.y) return a.y <= b.y;
         return a.z <= b.z;
     }
-    inline bool operator>=(const intVec3& a, const intVec3& b)
+    template<IntegralNumber I>
+    inline bool operator>=(const iVec3<I>& a, const iVec3<I>& b)
     {
         if (a.x != b.x) return a.x >= b.x;
         if (a.y != b.y) return a.y >= b.y;

@@ -590,7 +590,7 @@ namespace glMath
     template<FloatingNumber F> inline quat<F> quat<F>::lerpUnclamped(const quat<F>& start, const quat<F>& end, F t) 
     { 
         F invT = static_cast<F>(1.0) - t; // 1 - t
-        return (start * invT + end * t).normalized(); 
+        return (start * invT + end * t).normalize(); 
     }
 
 
@@ -626,6 +626,47 @@ namespace glMath
 
         return (s * wA) + (e * wB);
     }
+
+    #pragma endregion
+
+    #pragma region ReferenceOperators
+
+    template<FloatingNumber F>
+    inline quat<F>& quat<F>::operator+=(const quat<F>& other)
+    {
+        *this = *this + other;
+        return *this;
+    }
+
+    template<FloatingNumber F>
+    inline quat<F>& quat<F>::operator-=(const quat<F>& other)
+    {
+        *this = *this - other;
+        return *this;
+    }
+
+
+    template<FloatingNumber F>
+    inline quat<F>& quat<F>::operator*=(const quat<F>& other)
+    {
+        *this = *this * other;
+        return *this;
+    }
+    template<FloatingNumber F>
+    inline quat<F>& quat<F>::operator*=(F scalar)
+    {
+        *this = *this * scalar;
+        return *this;
+    }
+
+    template<FloatingNumber F>
+    inline quat<F>& quat<F>::operator/=(F scalar)
+    {
+        *this = *this / scalar;
+        return *this;
+    }
+
+
 
     #pragma endregion
 
@@ -709,6 +750,21 @@ namespace glMath
             rot.z * invScalar
         );
         
+    }
+
+
+    template<FloatingNumber F>
+    inline bool operator==(const quat<F>& a, const quat<F>& b)
+    {
+        return std::abs(a.w - b.w) < glMath::epsilon<F>() && 
+               std::abs(a.x - b.x) < glMath::epsilon<F>() && 
+               std::abs(a.y - b.y) < glMath::epsilon<F>() &&
+               std::abs(a.z - b.z) < glMath::epsilon<F>() ;
+    }
+    template<FloatingNumber F>
+    inline bool operator!=(const quat<F>& a, const quat<F>& b)
+    {
+        return !(a == b);
     }
 
 

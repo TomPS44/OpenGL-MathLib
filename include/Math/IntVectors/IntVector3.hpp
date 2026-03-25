@@ -10,144 +10,184 @@ namespace glMath
     template<IntegralNumber I>
     struct iVec2;
 
-    struct /*alignas(8)*/ intVec3 
+    /// @brief A struct to store 3 components x, y and z. They are the same type as I. 
+    /// You can acces them via vec.x/y/z, vec.r/g/b, vec.data[(0-3)].
+    /// @tparam I An IntegralNumber, so either an int, a long, or a long long. The components are stored as this type
+    template<IntegralNumber I>
+    struct iVec3
     {
     public:
         union 
         {
-            struct { int x, y, z; };
-            struct { int r, g, b; };
-            int data[3];
+            struct { I x, y, z; };
+            struct { I r, g, b; };
+            I data[3];
         };
 
     public:
-        intVec3();
-        intVec3(int scalar);
-        intVec3(int vx, int vy, int vz);
-        intVec3(const intVec3& vec);
+        iVec3();
+        iVec3(I scalar);
+        iVec3(I vx, I vy, I vz);
+        iVec3(const iVec3<I>& vec);
 
 
 
-        inline static intVec3 zero()     { return intVec3(0, 0, 0); };
-        inline static intVec3 one()      { return intVec3(1, 1, 1); };
-        inline static intVec3 right()    { return intVec3(1, 0, 0); };
-        inline static intVec3 left()     { return intVec3(-1, 0, 0); };
-        inline static intVec3 up()       { return intVec3(0, 1, 0); };
-        inline static intVec3 down()     { return intVec3(0, -1, 0); };
-        inline static intVec3 forward()  { return intVec3(0, 0, 1); };
-        inline static intVec3 backward() { return intVec3(0, 0, -1); };
+        inline static iVec3<I> zero()     { return iVec3<I>(0, 0, 0); };
+        inline static iVec3<I> one()      { return iVec3<I>(1, 1, 1); };
+        inline static iVec3<I> right()    { return iVec3<I>(1, 0, 0); };
+        inline static iVec3<I> left()     { return iVec3<I>(-1, 0, 0); };
+        inline static iVec3<I> up()       { return iVec3<I>(0, 1, 0); };
+        inline static iVec3<I> down()     { return iVec3<I>(0, -1, 0); };
+        inline static iVec3<I> forward()  { return iVec3<I>(0, 0, 1); };
+        inline static iVec3<I> backward() { return iVec3<I>(0, 0, -1); };
 
-        /*
-        inline intVec2 XX() const { return intVec2(x, x); }; 
-        inline intVec2 YY() const { return intVec2(y, y); };
-        inline intVec2 ZZ() const { return intVec2(z, z); };
-        inline intVec2 XY() const { return intVec2(x, y); };
-        inline intVec2 XZ() const { return intVec2(x, z); };
-        inline intVec2 YX() const { return intVec2(y, x); };
-        inline intVec2 YZ() const { return intVec2(y, z); };
-        inline intVec2 ZX() const { return intVec2(z, x); };
-        inline intVec2 ZY() const { return intVec2(z, y); };
-        */
+        
+        inline iVec2<I> xx() const { return iVec2<I>(x, x); }; 
+        inline iVec2<I> yy() const { return iVec2<I>(y, y); };
+        inline iVec2<I> zz() const { return iVec2<I>(z, z); };
+        inline iVec2<I> xy() const { return iVec2<I>(x, y); };
+        inline iVec2<I> xz() const { return iVec2<I>(x, z); };
+        inline iVec2<I> yx() const { return iVec2<I>(y, x); };
+        inline iVec2<I> yz() const { return iVec2<I>(y, z); };
+        inline iVec2<I> zx() const { return iVec2<I>(z, x); };
+        inline iVec2<I> zy() const { return iVec2<I>(z, y); };
+        
 
-        inline intVec3 XXX() const { return intVec3(x, x, x); };
-        inline intVec3 YYY() const { return intVec3(y, y, y); };
-        inline intVec3 ZZZ() const { return intVec3(z, z, z); };
-        inline intVec3 ZYX() const { return intVec3(z, y, x); };
-
-
-        // template<IntegralNumber type>
-        // intVec3<type> as() const;
+        inline iVec3<I> xxx() const { return iVec3<I>(x, x, x); };
+        inline iVec3<I> yyy() const { return iVec3<I>(y, y, y); };
+        inline iVec3<I> zzz() const { return iVec3<I>(z, z, z); };
+        inline iVec3<I> zyx() const { return iVec3<I>(z, y, x); };
 
 
-        int lengthSquared() const;
-        static int lengthSquared(const intVec3& vec);
+        template<IntegralNumber type>
+        iVec3<type> as() const;
 
-        int dotProduct(const intVec3& other) const;
-        static int dotProduct(const intVec3& a, const intVec3& b);
+        template<FloatingNumber type>
+        vec3<type> to() const;
 
-        intVec3 crossProduct(const intVec3& other) const;
-        static intVec3 crossProduct(const intVec3& a, const intVec3& b);
-
-        int distanceSquared(const intVec3& other) const;
-        static int distanceSquared(const intVec3& a, const intVec3& b);
-
-        intVec3& clamp(int minInclusive, int maxInclusive);
-        intVec3 getClampedVec(int minInclusive, int maxInclusive) const;
-        static intVec3 clamp(const intVec3& vec, int minInclusive, int maxInclusive);
-
-        intVec3 min(const intVec3& other) const;
-        static intVec3 min(const intVec3& a, const intVec3& b);
-
-        intVec3 max(const intVec3& other) const;
-        static intVec3 max(const intVec3& a, const intVec3& b);
-
-        intVec3& absValue();
-        intVec3 getAbsValueVec() const;
-        static intVec3 abs(const intVec3& vec);
 
         template<FloatingNumber F>
-        static intVec3 floor(const vec3<F>& fVec);
+        F length() const;
         template<FloatingNumber F>
-        static intVec3 round(const vec3<F>& fVec);
+        static F length(const iVec3<I>& vec);
+
+        /// @brief Calculates the Manhattan distance between itself and the vector in the parameter.
+        /// @param other The second vector used to caculate the distance.
+        /// @return The distance as the type of the iVecs.
+        I iDistance(const iVec3<I>& other) const;
+        static I iDistance(const iVec3<I>& a, const iVec3<I>& b);
         template<FloatingNumber F>
-        static intVec3 toInt(const vec3<F>& fVec);
+        /// @brief Calculates the Euclidean distance between itself and the vector in the parameter.
+        /// @param other The second vector used to caculate the distance.
+        /// @return The distance as the type of the iVecs.
+        F distance(const iVec3<I>& other) const;
+        template<FloatingNumber F>
+        static F distance(const iVec3<I>& a, const iVec3<I>& b);
+
+        I lengthSquared() const;
+        static I lengthSquared(const iVec3<I>& vec);
+
+        I dotProduct(const iVec3<I>& other) const;
+        static I dotProduct(const iVec3<I>& a, const iVec3<I>& b);
+
+        iVec3<I> crossProduct(const iVec3<I>& other) const;
+        static iVec3<I> crossProduct(const iVec3<I>& a, const iVec3<I>& b);
+
+        I distanceSquared(const iVec3<I>& other) const;
+        static I distanceSquared(const iVec3<I>& a, const iVec3<I>& b);
+
+        iVec3<I>& clamp(I minInclusive, I maxInclusive);
+        iVec3<I> getClampedVec(I minInclusive, I maxInclusive) const;
+        static iVec3<I> clamp(const iVec3<I>& vec, I minInclusive, I maxInclusive);
+
+        iVec3<I> min(const iVec3<I>& other) const;
+        static iVec3<I> min(const iVec3<I>& a, const iVec3<I>& b);
+
+        iVec3<I> max(const iVec3<I>& other) const;
+        static iVec3<I> max(const iVec3<I>& a, const iVec3<I>& b);
+
+        iVec3<I>& absValue();
+        iVec3<I> getAbsValueVec() const;
+        static iVec3<I> abs(const iVec3<I>& vec);
+
+        template<FloatingNumber F>
+        static iVec3<I> floor(const vec3<F>& fVec);
+        template<FloatingNumber F>
+        static iVec3<I> ceil(const vec3<F>& fVec);
+        template<FloatingNumber F>
+        static iVec3<I> round(const vec3<F>& fVec);
+        
 
 
 
-        intVec3& operator+=(const intVec3& other);
-        intVec3& operator+=(int scalar);
+        iVec3<I>& operator+=(const iVec3<I>& other);
+        iVec3<I>& operator+=(I scalar);
 
-        intVec3& operator-=(const intVec3& other);
-        intVec3& operator-=(int scalar);
+        iVec3<I>& operator-=(const iVec3<I>& other);
+        iVec3<I>& operator-=(I scalar);
 
-        intVec3& operator*=(int scalar);
-        intVec3& operator*=(const intVec3& other);
+        iVec3<I>& operator*=(I scalar);
+        iVec3<I>& operator*=(const iVec3<I>& other);
 
-        intVec3& operator/=(int scalar);
+        iVec3<I>& operator/=(I scalar);
 
-        intVec3& operator%=(int scalar);
+        iVec3<I>& operator%=(I scalar);
 
 
-        intVec3 operator-() const;
+        iVec3<I> operator-() const;
 
-        const int* valuePtr() const;
-        int& operator[](int index);
+        const I* valuePtr() const;
     };
 
-    intVec3 operator+(const intVec3& a, const intVec3& b);
-    intVec3 operator+(const intVec3& vec, int scalar);
+    template<IntegralNumber I>
+    iVec3<I> operator+(const iVec3<I>& a, const iVec3<I>& b);
+    template<IntegralNumber I>
+    iVec3<I> operator+(const iVec3<I>& vec, I scalar);
 
-    intVec3 operator-(const intVec3& a, const intVec3& b);
-    intVec3 operator-(const intVec3& vec, int scalar);
+    template<IntegralNumber I>
+    iVec3<I> operator-(const iVec3<I>& a, const iVec3<I>& b);
+    template<IntegralNumber I>
+    iVec3<I> operator-(const iVec3<I>& vec, I scalar);
 
-    intVec3 operator*(const intVec3& a, const intVec3& b);
-    intVec3 operator*(const intVec3& vec, int scalar);
-    intVec3 operator*(int scalar, const intVec3& vec);
+    template<IntegralNumber I>
+    iVec3<I> operator*(const iVec3<I>& a, const iVec3<I>& b);
+    template<IntegralNumber I>
+    iVec3<I> operator*(const iVec3<I>& vec, I scalar);
+    template<IntegralNumber I>
+    iVec3<I> operator*(I scalar, const iVec3<I>& vec);
 
-    intVec3 operator/(const intVec3& vec, int scalar);
+    template<IntegralNumber I>
+    iVec3<I> operator/(const iVec3<I>& vec, I scalar);
 
-    intVec3 operator%(const intVec3& vec, int scalar);
+    template<IntegralNumber I>
+    iVec3<I> operator%(const iVec3<I>& vec, I scalar);
 
 
-    bool operator==(const intVec3& a, const intVec3& b);
-    bool operator!=(const intVec3& a, const intVec3& b);
+    template<IntegralNumber I>
+    bool operator==(const iVec3<I>& a, const iVec3<I>& b);
+    template<IntegralNumber I>
+    bool operator!=(const iVec3<I>& a, const iVec3<I>& b);
 
-    bool operator<(const intVec3& a, const intVec3& b);
-    bool operator>(const intVec3& a, const intVec3& b);
-    bool operator<=(const intVec3& a, const intVec3& b);
-    bool operator>=(const intVec3& a, const intVec3& b);
+    template<IntegralNumber I>
+    bool operator<(const iVec3<I>& a, const iVec3<I>& b);
+    template<IntegralNumber I>
+    bool operator>(const iVec3<I>& a, const iVec3<I>& b);
+    template<IntegralNumber I>
+    bool operator<=(const iVec3<I>& a, const iVec3<I>& b);
+    template<IntegralNumber I>
+    bool operator>=(const iVec3<I>& a, const iVec3<I>& b);
 }
 
-template<>
-struct std::hash<glMath::intVec3>
+template<glMath::IntegralNumber I>
+struct std::hash<glMath::iVec3<I>>
 {
-    size_t operator()(const glMath::intVec3& vec) const
+    size_t operator()(const glMath::iVec3<I>& vec) const
     {
         // size_t h = 0;
 
-        // h ^= hash<int>{}(vec.x) + 0x9e3779b9 + (h << 6) + (h >> 2);
-        // h ^= hash<int>{}(vec.y) + 0x9e3779b9 + (h << 6) + (h >> 2);
-        // h ^= hash<int>{}(vec.z) + 0x9e3779b9 + (h << 6) + (h >> 2);
+        // h ^= hash<I>{}(vec.x) + 0x9e3779b9 + (h << 6) + (h >> 2);
+        // h ^= hash<I>{}(vec.y) + 0x9e3779b9 + (h << 6) + (h >> 2);
+        // h ^= hash<I>{}(vec.z) + 0x9e3779b9 + (h << 6) + (h >> 2);
 
         // return h;
 
@@ -155,7 +195,7 @@ struct std::hash<glMath::intVec3>
 
         size_t h = 0;
 
-        auto hash_combine = [&](int val) 
+        auto hash_combine = [&](I val) 
         {
             size_t k = static_cast<size_t>(val);
             k *= 0xcc9e2d51;

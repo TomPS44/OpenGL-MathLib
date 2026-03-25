@@ -8,7 +8,7 @@ namespace glMath
     struct vec2;
 
     template<IntegralNumber I>
-    struct alignas(sizeof(I) * 4) iVec2
+    struct iVec2
     {
     public:
         union 
@@ -32,13 +32,16 @@ namespace glMath
         inline static iVec2<I> up()    { return iVec2<I>(0, 1); }
 
 
-        inline iVec2<I> YX() const { return iVec2<I>(y, x); };
-        inline iVec2<I> XX() const { return iVec2<I>(x, x); };
-        inline iVec2<I> YY() const { return iVec2<I>(y, y); };
+        inline iVec2<I> yx() const { return iVec2<I>(y, x); };
+        inline iVec2<I> xx() const { return iVec2<I>(x, x); };
+        inline iVec2<I> yy() const { return iVec2<I>(y, y); };
 
 
         template<IntegralNumber type>
         iVec2<type> as() const;
+
+        template<FloatingNumber type>
+        vec2<type> to() const;
 
 
         I lengthSquared() const;
@@ -48,6 +51,19 @@ namespace glMath
         F length() const;
         template<FloatingNumber F>
         static F length(const iVec2<I>& vec);
+
+        /// @brief Calculates the Manhattan distance between itself and the vector in the parameter.
+        /// @param other The second vector used to caculate the distance.
+        /// @return The distance as the type of the iVecs.
+        I iDistance(const iVec2<I>& other) const;
+        static I iDistance(const iVec2<I>& a, const iVec2<I>& b);
+        template<FloatingNumber F>
+        /// @brief Calculates the Euclidean distance between itself and the vector in the parameter.
+        /// @param other The second vector used to caculate the distance.
+        /// @return The distance as the type of the iVecs.
+        F distance(const iVec2<I>& other) const;
+        template<FloatingNumber F>
+        static F distance(const iVec2<I>& a, const iVec2<I>& b);
 
         I dotProduct(const iVec2<I>& other) const;
         static I dotProduct(const iVec2<I>& a, const iVec2<I>& b);
@@ -94,7 +110,6 @@ namespace glMath
         iVec2<I> operator-() const;
 
         const I* valuePtr() const;
-        I& operator[](I index);
     };
 
 
@@ -135,10 +150,10 @@ namespace glMath
     bool operator>=(const iVec2<I>& a, const iVec2<I>& b);
 }
 
-template<IntegralNumber I>
-struct std::hash<iVec2<I>>
+template<glMath::IntegralNumber I>
+struct std::hash<glMath::iVec2<I>>
 {
-    size_t operator()(const iVec2<I>& vec) const
+    size_t operator()(const glMath::iVec2<I>& vec) const
     {
         // size_t hx = hash<I>{}(vec.x);
         // size_t hy = hash<I>{}(vec.y);

@@ -4,7 +4,7 @@
 #include "Math\Matrices\Matrix3x3.hpp"
 #include "Math\Matrices\Matrix4x4.hpp"
 
-using namespace glMath;
+// using namespace glMath;
 
 /// @brief shorthand for writing mat2<float>
 using mat2f = glMath::mat2<float>;

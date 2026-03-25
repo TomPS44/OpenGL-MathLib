@@ -62,6 +62,16 @@ namespace glMath
 
         vec3<F> transformPoint(const vec3<F>& point) const;
         static vec3<F> transformPoint(const vec3<F>& point, const dualQuat<F>& dQuat);
+
+
+        dualQuat& operator+=(const dualQuat& other);
+
+        dualQuat& operator-=(const dualQuat& other);
+        
+        dualQuat& operator*=(const dualQuat& other);
+        dualQuat& operator*=(F scalar);
+
+        dualQuat& operator/=(F scalar);
     };
 
     template<FloatingNumber F>
@@ -75,6 +85,12 @@ namespace glMath
 
     template<FloatingNumber F>
     dualQuat<F> operator*(F scalar, const dualQuat<F>& dQuat);
+
+
+    template<FloatingNumber F>
+    bool operator==(const dualQuat<F>& a, const dualQuat<F>& b);
+    template<FloatingNumber F>
+    bool operator!=(const dualQuat<F>& a, const dualQuat<F>& b);
 }
 
 #include "Math\Quaternions\DualQuaternion.inl"

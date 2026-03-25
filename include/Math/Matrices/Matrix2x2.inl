@@ -200,42 +200,49 @@ namespace glMath
     #pragma region ReferenceOperators
 
     template<FloatingNumber F>
-    inline mat2<F>& mat2<F>::operator+(const mat2<F>& other)
+    inline mat2<F>& mat2<F>::operator+=(const mat2<F>& other)
     {
-        return *this + other;
+        *this = *this + other;
+        return *this;
     }
     template<FloatingNumber F>
-    inline mat2<F>& mat2<F>::operator+(F scalar)
+    inline mat2<F>& mat2<F>::operator+=(F scalar)
     {
-        return *this + scalar;
-    }
-
-    template<FloatingNumber F>
-    inline mat2<F>& mat2<F>::operator-(const mat2<F>& other)
-    {
-        return *this - other;
-    }
-    template<FloatingNumber F>
-    inline mat2<F>& mat2<F>::operator-(F scalar)
-    {
-        return *this - scalar;
+        *this = *this + scalar;
+        return *this;
     }
 
     template<FloatingNumber F>
-    inline mat2<F>& mat2<F>::operator*(const mat2<F>& other)
+    inline mat2<F>& mat2<F>::operator-=(const mat2<F>& other)
     {
-        return *this * other;
+        *this = *this - other;
+        return *this;
     }
     template<FloatingNumber F>
-    inline mat2<F>& mat2<F>::operator*(F scalar)
+    inline mat2<F>& mat2<F>::operator-=(F scalar)
     {
-        return *this * scalar;
+        *this = *this - scalar;
+        return *this;
     }
 
     template<FloatingNumber F>
-    inline mat2<F>& mat2<F>::operator/(F scalar)
+    inline mat2<F>& mat2<F>::operator*=(const mat2<F>& other)
     {
-        return *this * scalar;
+        *this = *this * other;
+        return *this;
+    }
+    template<FloatingNumber F>
+    inline mat2<F>& mat2<F>::operator*=(F scalar)
+    {
+        *this = *this * scalar;
+        return *this;
+    }
+
+    template<FloatingNumber F>
+    inline mat2<F>& mat2<F>::operator/=(F scalar)
+    {
+        *this = *this / scalar;
+        return *this;
     }
 
     #pragma endregion

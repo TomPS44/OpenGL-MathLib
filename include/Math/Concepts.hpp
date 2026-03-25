@@ -23,7 +23,7 @@ namespace glMath
         std::is_same_v<T, float>  ||
         std::is_same_v<T, double> ;
 
-    // The concept IsComparable allows all the types that define the operators 
+    // The concept Comparable allows all the types that define the operators 
     // < , >, <=, >= , == , !=
     template<typename T>
     concept Comparable =
@@ -36,13 +36,17 @@ namespace glMath
             a == b;
             a != b;
         };
+
     // The concept IntegralNumber allows all the types that are the same as 
-    // int, long, (these 2 are the same), long long
+    // int, long, (these 2 are the same), long long, int8_t, int16_t, int32_t, int64_t
     template<typename T>
     concept IntegralNumber = 
-        std::is_same_v<T, int>      ||
-        std::is_same_v<T, long>     ||
-        std::is_same_v<T, long long>;
-        
-    
+        std::is_same_v<T, int>       ||
+        std::is_same_v<T, long>      ||
+        std::is_same_v<T, long long> ||
+        std::is_same_v<T, int8_t>    ||
+        std::is_same_v<T, int16_t>   ||
+        std::is_same_v<T, int32_t>   ||
+        std::is_same_v<T, int64_t>   ;
+
 }
